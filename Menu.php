@@ -1,25 +1,37 @@
 <?php
 
-
 /**
- * Class description
+ * Class menu for the DeviceImporter plugin
  *
  * @package     DeviceImporter
  * @author      Daryl Peterson <@gmail.com>
- * @copyright   Copyright (c) 2024, Daryl Peterson
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt
+ * @copyright   Copyright (c) 2026, Daryl Peterson
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
  * @since       1.0.0
  */
 
 namespace App\Plugins\DeviceImporter;
 
 use App\Plugins\Hooks\MenuEntryHook;
+use Illuminate\Support\Facades\Log;
 
+try {
+    require_once __DIR__ . '/src/includes.php';
+} catch (\Exception $e) {
+    Log::error('Failed to include includes.php: ' . $e->getMessage());
+}
 
-require_once __DIR__ . '/src/includes.php';
-
-// this will create a menu entry in the plugin menu
-// it should generally just be a
+/**
+ * Class menu for the DeviceImporter plugin
+ *
+ * @package     DeviceImporter
+ * @author      Daryl Peterson <@gmail.com>
+ * @copyright   Copyright (c) 2026, Daryl Peterson
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
+ * @since       1.0.0
+ */
 class Menu extends MenuEntryHook {
 
     // override the data function to add additional data to be accessed in the view

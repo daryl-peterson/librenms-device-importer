@@ -1,0 +1,35 @@
+{
+    "Class": {
+		"prefix": "c-",
+		"body": [
+			"/**",
+			" * ${1:Class description}",
+			" * ",
+			" * @package     ${2:DeviceImporter}",
+			" * @author      ${3:Daryl Peterson <@gmail.com>}",
+ 			" * @license     ${4:https://opensource.org MIT License}",
+ 			" * @link        ${5:https://github.com/daryl-peterson/}",
+			" * @since       ${6:1.0.0}",
+			" */",
+			"",
+			"namespace ${7:$TM_FILENAME_BASE};",
+			"",
+			"/**",
+			" * ${1:Class description}",
+			" * ",
+			" * @package     ${2:DeviceImporter}",
+			" * @author      ${3:Daryl Peterson <@gmail.com>}",
+ 			" * @license     ${4:https://opensource.org MIT License}",
+ 			" * @link        ${5:https://github.com/daryl-peterson/}",
+			" * @since       ${6:1.0.0}",
+			" */",
+			"class ${3:$TM_FILENAME_BASE} {",
+			"\tpublic function __construct()",
+			"\t{",
+			"\t\t${10:# Code Here}",
+			"\t}",
+			"}"
+		],
+		"description": "class"
+	},
+}
