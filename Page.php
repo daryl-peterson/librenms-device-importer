@@ -1,38 +1,43 @@
 <?php
-/*
- * ExampleSettingsPlugin.php
+
+/**
+ * Page class for the DeviceImporter plugin
  *
- * -Description-
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @package    LibreNMS
- * @link       http://librenms.org
- * @copyright  2021 Tony Murray
- * @author     Tony Murray <murraytony@gmail.com>
+ * @package     App\Plugins\DeviceImporter
+ * @author      Daryl Peterson <@gmail.com>
+ * @copyright   Copyright (c) 2026, Daryl Peterson
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/librenms-device-importer
+ * @since       1.0.0
  */
 
-namespace App\Plugins\Device;
+namespace App\Plugins\DeviceImporter;
 
-use App\Plugins\DeviceImporter\Libs\DeviceImporter;
 use App\Plugins\Hooks\PageHook;
 
+require_once __DIR__ . '/src/includes.php';
+
+/**
+ * Page class for the DeviceImporter plugin
+ *
+ * @package     App\Plugins\DeviceImporter
+ * @author      Daryl Peterson <@gmail.com>
+ * @copyright   Copyright (c) 2026, Daryl Peterson
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/librenms-device-importer
+ * @since       1.0.0
+ */
 class Page extends PageHook {
 
-	public function data(): array {
-		return array(
-			'info' => DeviceImporter::getInfo(),
-		);
-	}
+
+    // override the data function to add additional data to be accessed in the view
+    // default just passes the stored data through
+    // inside the blade, all variables will be named based on the key in the returned array
+    public function data(): array {
+
+
+        return [
+            'something' => 'this is a variable and can be accessed with {{ $something }}',
+        ];
+    }
 }
