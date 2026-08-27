@@ -42,13 +42,8 @@ class Settings extends SettingsHook {
      * @return array The data to be passed to the settings view.
      */
     public function data(array $settings = []): array {
-        // run any calculations here
-        $total = array_sum([1, 2, 3, 4]);
-
         return [
-            'settings' => $settings, // this is an array of all the settings stored in the database
-            'something' => 'this is a variable and can be accessed with {{ $something }}',
-            'total' => $total,
+            'settings' => $settings,
         ];
     }
 }

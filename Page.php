@@ -1,27 +1,14 @@
 <?php
 
-/*
- * ExampleSettingsPlugin.php
+/**
+ * Page for the Device Importer plugin.
  *
- * -Description-
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @package    LibreNMS
- * @link       http://librenms.org
- * @copyright  2021 Tony Murray
- * @author     Tony Murray <murraytony@gmail.com>
+ * @package     App\Plugins\DeviceImporter
+ * @author      Daryl Peterson <@gmail.com>
+ * @copyright   Copyright (c) 2026, Daryl Peterson
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
+ * @since       1.0.0
  */
 
 namespace App\Plugins\DeviceImporter;
@@ -35,35 +22,22 @@ try {
     Log::error('Failed to include includes.php: ' . $e->getMessage());
 }
 
+/**
+ * Page for the Device Importer plugin.
+ *
+ * @package     App\Plugins\DeviceImporter
+ * @author      Daryl Peterson <@gmail.com>
+ * @copyright   Copyright (c) 2026, Daryl Peterson
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
+ * @since       1.0.0
+ */
 class Page extends PageHook {
-    // point to the view for your plugin's settings
-    // this is the default name so you can create the blade file as in this plugin
-    // by omitting the variable, or point to another one
 
-    //    public string $view = 'resources.views.page';
 
-    // The authorize method will determine if the user has access to this page.
-    // if you want all users to be able to access this page simple return true
-    public function authorize(\Illuminate\Contracts\Auth\Authenticatable $user): bool {
-        // you can check user's roles like this:
-        //        return $user->can('admin');
-
-        // or use whatever you like
-        //        return \Carbon\Carbon::now()->dayOfWeek == Carbon::THURSDAY; // only allowed access on Thursdays!
-
-        return true; // allow every logged in user to access
-    }
-
-    // override the data function to add additional data to be accessed in the view
-    // default just passes the stored data through
-    // inside the blade, all variables will be named based on the key in the returned array
     public function data(): array {
-        // run any calculations here
-
-
         return [
-            'something' => 'this is a variable and can be accessed with {{ $something }}',
-
+            'info' => Importer::getInfo(),
         ];
     }
 }
