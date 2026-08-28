@@ -16,15 +16,15 @@ use LibreNMS\Plugins;
 
 class DeviceImportProvider extends ServiceProvider {
 
-	public function register(): void {
-	}
+    public function register(): void {
+    }
 
-	public function boot(): void {
-		$pluginName = 'device-importer';
+    public function boot(): void {
+        $pluginName = 'device-importer';
 
-		$this->loadViewsFrom(__DIR__ . '/../resources/views', 'device-importer');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'device-importer');
 
-		/*
+        /*
          * Compatibility view path.
          *
          * LibreNMS local plugins commonly reference views like:
@@ -33,15 +33,14 @@ class DeviceImportProvider extends ServiceProvider {
          * Package views can also be referenced as:
          * device-photo::page
          */
-		$this->loadViewsFrom(__DIR__ . '/..', 'device-importer');
+        $this->loadViewsFrom(__DIR__ . '/..', 'device-importer');
 
-		//$this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+        //$this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
-		$pluginManager = $this->app->make(PluginManagerInterface::class);
-
-		$pluginManager->publishHook($pluginName, DeviceOverviewHookInterface::class, DeviceOverview::class);
-		$pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
-		$pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
-		$pluginManager->publishHook($pluginName, SettingsHookInterface::class, Settings::class);
-	}
+        $pluginManager = $this->app->make(PluginManagerInterface::class);
+        $pluginManager->publishHook($pluginName, DeviceOverviewHookInterface::class, DeviceOverview::class);
+        $pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
+        $pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
+        $pluginManager->publishHook($pluginName, SettingsHookInterface::class, Settings::class);
+    }
 }

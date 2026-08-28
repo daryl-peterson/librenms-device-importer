@@ -1,10 +1,6 @@
 <div class="panel panel-default" style="margin: 2em"></div>
-
-
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
-
-
 
                 <!-- Main Form Card -->
                 <div class="panel panel-default">
@@ -36,5 +32,4 @@
 
             </div>
         </div>
-
 </div>
