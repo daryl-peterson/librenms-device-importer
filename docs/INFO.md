@@ -24,3 +24,9 @@ https://github.com/WizballESY/librenms-device-photo/tree/main
 
 
 https://github.com/murrant/librenms-example-plugin
+
+
+
+## Git create tag and push
+git tag v0.1.0-alpha.01
+git push origin v0.1.0-alpha.01
