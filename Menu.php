@@ -44,11 +44,5 @@ class Menu extends MenuEntryHook {
         ];
     }
 
-    public function menu(): array {
-        return [
-            'title' => 'Device Importer',
-            'icon'  => 'fa fa-upload',
-            'route' => 'plugin.deviceimporter.index',
-        ];
-    }
+    
 }

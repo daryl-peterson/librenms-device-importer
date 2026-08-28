@@ -16,7 +16,7 @@ use App\Models\Plugin;
  */
 class Importer {
 
-    const PLUGIN          = 'DeviceImporter';
+    const PLUGIN          = 'librenms-device-importer';
     const TITLE           = 'Device Importer';
     const AUTHOR          = 'Daryl Peterson';
     const VER             = '0.0.1';
