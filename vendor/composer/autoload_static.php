@@ -7,7 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInita499adf61c53aff4bd1a5cb289db32e6
 {
     public static $prefixLengthsPsr4 = array (
-        'D' => 
+        'D' =>
         array (
             'DRP\\DeviceImporter\\Hooks\\' => 25,
             'DRP\\DeviceImporter\\' => 19,
@@ -15,11 +15,11 @@ class ComposerStaticInita499adf61c53aff4bd1a5cb289db32e6
     );
 
     public static $prefixDirsPsr4 = array (
-        'DRP\\DeviceImporter\\Hooks\\' => 
+        'DRP\\DeviceImporter\\Hooks\\' =>
         array (
             0 => __DIR__ . '/../..' . '/hooks',
         ),
-        'DRP\\DeviceImporter\\' => 
+        'DRP\\DeviceImporter\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),

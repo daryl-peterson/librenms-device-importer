@@ -12,10 +12,11 @@ use DRP\DeviceImporter\Hooks\DeviceOverview;
 use DRP\DeviceImporter\Hooks\Menu;
 use DRP\DeviceImporter\Hooks\Page;
 use DRP\DeviceImporter\Hooks\Settings;
+use LibreNMS\Plugins;
 
 class DeviceImportProvider extends ServiceProvider {
+
     public function register(): void {
-        $this->mergeConfigFrom(__DIR__ . '/../config/device-photo.php', 'device-photo');
     }
 
     public function boot(): void {
