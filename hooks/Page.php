@@ -16,11 +16,7 @@ namespace DRP\DeviceImporter\Hooks;
 use App\Plugins\Hooks\PageHook;
 use Illuminate\Support\Facades\Log;
 
-try {
-    require_once __DIR__ . '/src/includes.php';
-} catch (\Exception $e) {
-    Log::error('Failed to include includes.php: ' . $e->getMessage());
-}
+
 
 /**
  * Page for the Device Importer plugin.
@@ -35,9 +31,9 @@ try {
 class Page extends PageHook {
 
 
-    public function data(): array {
-        return [
-            'info' => Importer::getInfo(),
-        ];
-    }
+	public function data(): array {
+		return [
+			'info' => Importer::getInfo(),
+		];
+	}
 }
