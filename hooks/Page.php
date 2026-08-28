@@ -14,8 +14,7 @@
 namespace DRP\DeviceImporter\Hooks;
 
 use App\Plugins\Hooks\PageHook;
-use Illuminate\Support\Facades\Log;
-
+use DRP\DeviceImporter\Importer;
 
 
 /**
@@ -30,10 +29,10 @@ use Illuminate\Support\Facades\Log;
  */
 class Page extends PageHook {
 
+    public function data(): array {
 
-	public function data(): array {
-		return [
-			'info' => Importer::getInfo(),
-		];
-	}
+        return [
+            'info' => Importer::getInfo(),
+        ];
+    }
 }

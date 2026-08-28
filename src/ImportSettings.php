@@ -11,7 +11,7 @@
  * @since       1.0.0
  */
 
-namespace App\Plugins\DeviceImporter;
+namespace DRP\DeviceImporter;
 
 /**
  * Import settings for the Device Importer plugin.

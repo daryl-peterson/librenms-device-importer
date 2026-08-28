@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Plugins\DeviceImporter;
+namespace DRP\DeviceImporter;
 
 use App\Models\Plugin;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Importer for the Device Importer plugin.
@@ -16,7 +17,7 @@ use App\Models\Plugin;
  */
 class Importer {
 
-    const PLUGIN          = 'librenms-device-importer';
+    const PLUGIN          = 'device-importer';
     const TITLE           = 'Device Importer';
     const AUTHOR          = 'Daryl Peterson';
     const VER             = '0.0.1';
@@ -34,6 +35,7 @@ class Importer {
      * @version 1.0.0
      */
     public static function getInfo() {
+
         return array(
             'name'     => self::PLUGIN,
             'title'    => self::TITLE,

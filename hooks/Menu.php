@@ -14,7 +14,7 @@
 namespace DRP\DeviceImporter\Hooks;
 
 use App\Plugins\Hooks\MenuEntryHook;
-use Illuminate\Support\Facades\Log;
+
 
 
 
@@ -30,13 +30,13 @@ use Illuminate\Support\Facades\Log;
  */
 class Menu extends MenuEntryHook {
 
-	// override the data function to add additional data to be accessed in the view
-	// inside the blade, all variables will be named based on the key in the returned array
-	public function data(array $settings = []): array {
-		// inject settings and count how many we have so we can display it in the menu
+    // override the data function to add additional data to be accessed in the view
+    // inside the blade, all variables will be named based on the key in the returned array
+    public function data(array $settings = []): array {
+        // inject settings and count how many we have so we can display it in the menu
 
-		return [
-			'count' => 32,
-		];
-	}
+        return [
+            'count' => 32,
+        ];
+    }
 }
