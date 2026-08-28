@@ -17,5 +17,12 @@
             "DRP\\DeviceImporter\\": "src/",
             "DRP\\DeviceImporter\\Hooks\\": "hooks/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DRP\\DeviceImporter\\DeviceImportProvider"
+            ]
+        }
     }
 }

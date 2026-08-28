@@ -24,7 +24,7 @@
  * @author     Tony Murray <murraytony@gmail.com>
  */
 
-namespace App\Plugins\DeviceImporter;
+namespace DRP\DeviceImporter\Hooks;
 
 use App\Plugins\Hooks\DeviceOverviewHook;
 

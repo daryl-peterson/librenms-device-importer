@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class menu for the DeviceImporter plugin
+ * Page for the Device Importer plugin.
  *
- * @package     DeviceImporter
+ * @package     App\Plugins\DeviceImporter
  * @author      Daryl Peterson <@gmail.com>
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
@@ -11,9 +11,9 @@
  * @since       1.0.0
  */
 
-namespace App\Plugins\DeviceImporter;
+namespace DRP\DeviceImporter\Hooks;
 
-use App\Plugins\Hooks\MenuEntryHook;
+use App\Plugins\Hooks\PageHook;
 use Illuminate\Support\Facades\Log;
 
 try {
@@ -23,26 +23,21 @@ try {
 }
 
 /**
- * Class menu for the DeviceImporter plugin
+ * Page for the Device Importer plugin.
  *
- * @package     DeviceImporter
+ * @package     App\Plugins\DeviceImporter
  * @author      Daryl Peterson <@gmail.com>
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
  * @since       1.0.0
  */
-class Menu extends MenuEntryHook {
+class Page extends PageHook {
 
-    // override the data function to add additional data to be accessed in the view
-    // inside the blade, all variables will be named based on the key in the returned array
-    public function data(array $settings = []): array {
-        // inject settings and count how many we have so we can display it in the menu
 
+    public function data(): array {
         return [
-            'count' => 32,
+            'info' => Importer::getInfo(),
         ];
     }
-
-    
 }
