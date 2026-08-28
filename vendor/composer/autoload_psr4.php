@@ -6,6 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'DRP\\DeviceImporter\\Hooks\\' => array($baseDir . '/hooks'),
     'DRP\\DeviceImporter\\' => array($baseDir . '/src'),
 );

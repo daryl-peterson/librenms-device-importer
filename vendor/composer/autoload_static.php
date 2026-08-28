@@ -9,16 +9,11 @@ class ComposerStaticInita499adf61c53aff4bd1a5cb289db32e6
     public static $prefixLengthsPsr4 = array (
         'D' =>
         array (
-            'DRP\\DeviceImporter\\Hooks\\' => 25,
             'DRP\\DeviceImporter\\' => 19,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'DRP\\DeviceImporter\\Hooks\\' =>
-        array (
-            0 => __DIR__ . '/../..' . '/hooks',
-        ),
         'DRP\\DeviceImporter\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
