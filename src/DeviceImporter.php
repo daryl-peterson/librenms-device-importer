@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
  * @link        https://github.com/daryl-peterson/
  * @since       1.0.0
  */
-class Importer {
+class DeviceImporter {
 
     const PLUGIN          = 'device-importer';
     const TITLE           = 'Device Importer';

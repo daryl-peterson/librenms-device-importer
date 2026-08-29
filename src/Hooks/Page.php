@@ -14,7 +14,7 @@
 namespace DRP\DeviceImporter\Hooks;
 
 use App\Plugins\Hooks\PageHook;
-use DRP\DeviceImporter\Importer;
+use DRP\DeviceImporter\DeviceImporter;
 
 
 /**
@@ -32,7 +32,7 @@ class Page extends PageHook {
     public function data(): array {
 
         return [
-            'info' => Importer::getInfo(),
+            'info' => DeviceImporter::getInfo(),
         ];
     }
 }
