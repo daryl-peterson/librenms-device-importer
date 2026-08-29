@@ -13,9 +13,9 @@
 
 namespace DRP\DeviceImporter\Controllers;
 
-use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use DRP\DeviceImporter\DeviceImporter;
 
 
 /**
@@ -44,17 +44,14 @@ class ActionController extends Controller {
 
         return match ($action) {
             'upload' => $this->upload($request,),
-            default => $this->redirect( 'unknown_action'),
+            default => $this->redirect('unknown_action'),
         };
     }
 
-    public function upload(Request $request){
-
+    public function upload(Request $request) {
     }
 
-    private function redirect(?string $status = null)
-    {
-
+    private function redirect(?string $status = null) {
 
         $query = [];
 
@@ -63,6 +60,8 @@ class ActionController extends Controller {
             $query['status'] = $status;
         }
 
-        return redirect(url('plugin/device-photo') . ($query ? '?' . http_build_query($query) : ''));
+        $path = url('plugin/' . DeviceImporter::PLUGIN);
+
+        return redirect($path . ($query ? '?' . http_build_query($query) : ''));
     }
 }

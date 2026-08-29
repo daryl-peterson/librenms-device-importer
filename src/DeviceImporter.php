@@ -3,7 +3,6 @@
 namespace DRP\DeviceImporter;
 
 use App\Models\Plugin;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Importer for the Device Importer plugin.
