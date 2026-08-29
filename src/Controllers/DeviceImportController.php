@@ -15,8 +15,9 @@ namespace DRP\DeviceImporter\Controllers;
 
 
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Log;
+//use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use DRP\DeviceImporter\DeviceImporter;
 
 /**
  * Device Import Controller
@@ -34,11 +35,17 @@ class DeviceImportController extends Controller {
 
     public function index(): View {
 
-
+        /*
         $filepath = "../resources/views/layouts/menu.blade.php";
         $contents = (array) file_get_contents($filepath);
         Log::alert('CONTESTS', $contents);
+        */
 
         return view('device-importer::page');
+    }
+
+    public function upload(): View {
+        $data = DeviceImporter::getInfo();
+        return view('device-importer::file.upload');
     }
 }

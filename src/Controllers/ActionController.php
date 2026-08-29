@@ -16,7 +16,7 @@ namespace DRP\DeviceImporter\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use DRP\DeviceImporter\DeviceImporter;
-
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Action Controller
@@ -49,6 +49,30 @@ class ActionController extends Controller {
     }
 
     public function upload(Request $request) {
+
+        if (!Auth::check() || Auth::user()->hasRole('admin')) {
+            return $this->redirect('permission_denied');
+        }
+
+        $file = $request->file('csv');
+        if (empty($file)) {
+            return $this->redirect('no_file');
+        }
+
+        // Check if the file is valid
+        if (! $file->isValid()) {
+            return $this->redirect('invalid_file');
+        }
+
+        $mimeType = $this->getMimeType($file);
+        if ($mimeType !== 'text/csv') {
+            return $this->redirect('invalid_file');
+        }
+
+        // Process the CSV file here
+        // ...
+
+        return $this->redirect('success');
     }
 
     private function redirect(?string $status = null) {
@@ -60,7 +84,11 @@ class ActionController extends Controller {
             $query['status'] = $status;
         }
 
+
+
         $path = url('plugin/' . DeviceImporter::PLUGIN);
+
+
 
         return redirect($path . ($query ? '?' . http_build_query($query) : ''));
     }

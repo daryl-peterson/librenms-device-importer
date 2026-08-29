@@ -31,7 +31,7 @@
                 </div>
                 <div class="panel-body">
 
-                    <form action="{{ route('plugin.fileuploader.settings') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('device-importer.action') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <div class="form-group">
