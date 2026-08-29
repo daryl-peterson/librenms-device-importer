@@ -6,5 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'LibreNMS\\Interfaces\\Plugins\\' => array($vendorDir . '/librenms/plugin-interfaces/src'),
     'DRP\\DeviceImporter\\' => array($baseDir . '/src'),
 );

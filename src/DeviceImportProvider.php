@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Class DeviceImportProvider
+ *
+ * @package     device-importer
+ * @author      Daryl Peterson <@gmail.com>
+ * @copyright   Copyright (c) 2026, Daryl Peterson
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
+ * @since       1.0.0
+ */
+
 namespace DRP\DeviceImporter;
 
 use Illuminate\Support\ServiceProvider;
@@ -14,6 +25,16 @@ use DRP\DeviceImporter\Hooks\Page;
 use DRP\DeviceImporter\Hooks\Settings;
 use LibreNMS\Plugins;
 
+/**
+ * Class DeviceImportProvider
+ *
+ * @package     device-importer
+ * @author      Daryl Peterson <@gmail.com>
+ * @copyright   Copyright (c) 2026, Daryl Peterson
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
+ * @since       1.0.0
+ */
 class DeviceImportProvider extends ServiceProvider {
 
     public function register(): void {
@@ -28,10 +49,10 @@ class DeviceImportProvider extends ServiceProvider {
          * Compatibility view path.
          *
          * LibreNMS local plugins commonly reference views like:
-         * device-photo::resources.views.page
+         * device-importer::resources.views.page
          *
          * Package views can also be referenced as:
-         * device-photo::page
+         * device-importer::page
          */
         $this->loadViewsFrom(__DIR__ . '/..', 'device-importer');
 

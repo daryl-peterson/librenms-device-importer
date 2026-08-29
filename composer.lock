@@ -1,0 +1,56 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "75cfa4b544bd33f25796ec4069bed5d5",
+    "packages": [
+        {
+            "name": "librenms/plugin-interfaces",
+            "version": "1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/librenms/plugin-interfaces.git",
+                "reference": "7a196c3e47c5c5eb140f895dde6ceac998cf7b48"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/librenms/plugin-interfaces/zipball/7a196c3e47c5c5eb140f895dde6ceac998cf7b48",
+                "reference": "7a196c3e47c5c5eb140f895dde6ceac998cf7b48",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "LibreNMS\\Interfaces\\Plugins\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "0BSD"
+            ],
+            "description": "Interfaces required to create a LibreNMS Plugin",
+            "homepage": "https://www.librenms.org/",
+            "support": {
+                "issues": "https://github.com/librenms/plugin-interfaces/issues",
+                "source": "https://github.com/librenms/plugin-interfaces/tree/1.0"
+            },
+            "time": "2024-08-15T15:23:53+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": "^8.4"
+    },
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
+}

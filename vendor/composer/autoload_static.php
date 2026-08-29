@@ -4,13 +4,17 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInita499adf61c53aff4bd1a5cb289db32e6
+class ComposerStaticInit60994b4d99576da204acbf97d925936f
 {
     public static $files = array (
         '1e8797a10059391bc33bb077220d79be' => __DIR__ . '/../..' . '/helpers.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'L' =>
+        array (
+            'LibreNMS\\Interfaces\\Plugins\\' => 28,
+        ),
         'D' =>
         array (
             'DRP\\DeviceImporter\\' => 19,
@@ -18,6 +22,10 @@ class ComposerStaticInita499adf61c53aff4bd1a5cb289db32e6
     );
 
     public static $prefixDirsPsr4 = array (
+        'LibreNMS\\Interfaces\\Plugins\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/librenms/plugin-interfaces/src',
+        ),
         'DRP\\DeviceImporter\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
@@ -31,9 +39,9 @@ class ComposerStaticInita499adf61c53aff4bd1a5cb289db32e6
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInita499adf61c53aff4bd1a5cb289db32e6::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInita499adf61c53aff4bd1a5cb289db32e6::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInita499adf61c53aff4bd1a5cb289db32e6::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit60994b4d99576da204acbf97d925936f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit60994b4d99576da204acbf97d925936f::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit60994b4d99576da204acbf97d925936f::$classMap;
 
         }, null, ClassLoader::class);
     }

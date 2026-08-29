@@ -1,13 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+use DRP\DeviceImporter\Controllers\DeviceImportController;
 use DRP\DeviceImporter\Controllers\ActionController;
-use DRP\DeviceImporter\Controllers\ImportController;
 
 
-Route::middleware(['web'])
-    ->get('plugin/device-importer-package/image', [ImportController::class, 'show'])
-    ->name('device-importer.image');
+
+Route::middleware(['web', 'auth'])->group(function (): void {
+    Route::get('plugin/device-importer-package', [DeviceImportController::class, 'index']);
+});
+
 
 
 Route::middleware(['web'])
