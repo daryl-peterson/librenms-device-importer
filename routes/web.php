@@ -7,12 +7,12 @@ use DRP\DeviceImporter\Controllers\ActionController;
 
 
 
-
+/*
 
 Route::middleware(['web'])
     ->get('plugin/device-importer/', [DeviceImportController::class, 'index'])
     ->name('device-importer.index');
-
+*/
 
 Route::middleware(['web'])
     ->get('plugin/device-importer/upload', [DeviceImportController::class, 'upload'])

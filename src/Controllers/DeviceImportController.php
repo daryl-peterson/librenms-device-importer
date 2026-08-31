@@ -46,6 +46,6 @@ class DeviceImportController extends Controller {
 
     public function upload(): View {
         $data = DeviceImporter::getInfo();
-        return view('device-importer::file.upload');
+        return view('device-importer::upload');
     }
 }

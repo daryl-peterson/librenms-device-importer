@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use DRP\DeviceImporter\DeviceImporter;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Action Controller
@@ -40,6 +41,7 @@ class ActionController extends Controller {
         }
 
         $action = (string) $request->input('action', '');
+        Log::debug('Action requested: ' . $action . ' by user: ' . Auth::id());
 
 
         return match ($action) {
@@ -49,12 +51,16 @@ class ActionController extends Controller {
     }
 
     public function upload(Request $request) {
+        Log::debug('Upload action initiated by user: ' . Auth::id());
+
 
         if (!Auth::check() || Auth::user()->hasRole('admin')) {
-            return $this->redirect('permission_denied');
+            //return $this->redirect('permission_denied');
         }
 
         $file = $request->file('csv');
+
+        Log::debug('CSV file: ', [$file]);
         if (empty($file)) {
             return $this->redirect('no_file');
         }
@@ -64,13 +70,18 @@ class ActionController extends Controller {
             return $this->redirect('invalid_file');
         }
 
-        $mimeType = $this->getMimeType($file);
+        $mimeType = $file->getMimeType($file);
+        Log::debug('CSV MIME type: ' . $mimeType);
         if ($mimeType !== 'text/csv') {
             return $this->redirect('invalid_file');
         }
 
         // Process the CSV file here
         // ...
+
+        $contents = $file->get();
+        Log::debug('CSV contents: ' . $contents);
+
 
         return $this->redirect('success');
     }

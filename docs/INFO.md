@@ -28,6 +28,18 @@ https://github.com/WizballESY/librenms-device-photo/tree/main
 
 https://github.com/murrant/librenms-example-plugin
 
+## Clear Views
+
+php artisan optimize:clear
+php artisan view:clear
+
+
+
+## Other Plugin samples
+
+https://github.com/WizballESY/librenms-device-photo/tree/main
+[https://github.com/murrant/librenms-example-plugin]()
+
 ## Git create tag and push
 
 git tag v0.1.0-alpha.01

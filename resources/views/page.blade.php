@@ -10,18 +10,13 @@
                 Version : {{ $info['ver'] }}
             </p>
         </div>
-        <div style="margin-top: 2em">
-            <a href="{{ $info['settings'] }}" class="btn btn-primary btn-lg" role="button">Settings</a>
-        </div>
-        <div style="margin-top: 2em">
-            <a href="{{ $info['settings'] }}" class="btn btn-primary btn-lg" role="button">Settings</a>
-        </div>
-        <form method="post" action="{{ url('plugin/device-importer/action') }}" enctype="multipart/form-data" style="margin-bottom: 28px;" id="device-photo-upload-form">
-            @csrf
-            <input type="hidden" name="action" value="upload">
 
-            <input type="file" name="csv" accept=".csv">
-            <button type="submit" class="btn btn-primary">Upload CSV</button>
-        </form>
+            <div class="pull-left">
+                <div style="margin-top: 2em" class="d-inline">
+                    <a href="{{ $info['settings'] }}" class="btn btn-primary btn-lg" role="button">Settings</a>
+                    <a href="{{ route('device-importer.upload') }}" class="btn btn-primary btn-lg" role="button">Upload</a>
+                </div>
+            </div>
+
     </div>
 </div>
