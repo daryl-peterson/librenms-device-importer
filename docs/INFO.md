@@ -33,8 +33,6 @@ https://github.com/murrant/librenms-example-plugin
 php artisan optimize:clear
 php artisan view:clear
 
-
-
 ## Other Plugin samples
 
 https://github.com/WizballESY/librenms-device-photo/tree/main
@@ -44,3 +42,9 @@ https://github.com/WizballESY/librenms-device-photo/tree/main
 
 git tag v0.1.0-alpha.01
 git push origin v0.1.0-alpha.01
+
+
+
+## Migrate
+
+./lnms migrate --path=vendor/daryl-peterson/librenms-device-importer/database/migrations

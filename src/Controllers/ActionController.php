@@ -18,6 +18,8 @@ use Illuminate\Routing\Controller;
 use DRP\DeviceImporter\DeviceImporter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\UploadedFile;
+use DateTime;
 
 /**
  * Action Controller
@@ -70,20 +72,53 @@ class ActionController extends Controller {
             return $this->redirect('invalid_file');
         }
 
+        $request->validate([
+            'csv' => 'required|file|mimes:csv,txt',
+        ]);
+
         $mimeType = $file->getMimeType($file);
         Log::debug('CSV MIME type: ' . $mimeType);
         if ($mimeType !== 'text/csv') {
             return $this->redirect('invalid_file');
         }
 
+        Log::debug('FILE', [$file]);
+
         // Process the CSV file here
         // ...
 
-        $contents = $file->get();
-        Log::debug('CSV contents: ' . $contents);
+
+        Log::debug('CSV: ', $job);
+
+        $date = new DateTime();
+        $safeName = $date->format('YmdHis') . "-device-import.csv";
+
+        $this->addJob($file->get());
+
+        $path = $file->storeAs('uploads', $safeName);
+
 
 
         return $this->redirect('success');
+    }
+
+    private function addJob(string $payload) {
+        try {
+            $job = [];
+            $job['queue'] = 'device_import';
+            $job['payload'] = $payload;
+
+            $job['attempts'] = 0;
+            $job['reserved_at'] = null;
+            $job['available_at'] = time();
+            $job['created_at'] = time();
+            config(['queue.connections.database.table' => 'plugin_jobs']);
+            dispatch(new \DRP\DeviceImporter\Jobs\ImportDataJob($job));
+
+            Log::debug('JOB: ', $job);
+        } catch (\Throwable $th) {
+            Log::error('Failed to add job', ['exception' => $th]);
+        }
     }
 
     private function redirect(?string $status = null) {
