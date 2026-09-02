@@ -20,8 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\UploadedFile;
 
-use SNMP;
-use DateTime;
+
 use App\Models\Device;
 
 use DRP\DeviceImporter\DeviceImporter;
@@ -104,16 +103,7 @@ class ActionController extends Controller {
         Log::debug("FileManager Status: " . PHP_EOL . print_r($status, true));
 
 
-        /*
-        $contents = explode(PHP_EOL, $file->get());
 
-        $this->processUpload($contents);
-        return $this->redirect('success');
-
-        $contents = explode(PHP_EOL, $file->get());
-
-        $this->processUpload($contents);
-        */
         return $this->redirect('success');
     }
 
