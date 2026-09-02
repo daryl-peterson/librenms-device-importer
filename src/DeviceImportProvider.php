@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class DeviceImportProvider
+ * Device import service provider.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -26,7 +26,7 @@ use DRP\DeviceImporter\Hooks\Settings;
 use LibreNMS\Plugins;
 
 /**
- * Class DeviceImportProvider
+ * Device import service provider.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>

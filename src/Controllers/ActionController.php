@@ -15,16 +15,20 @@ namespace DRP\DeviceImporter\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use DRP\DeviceImporter\DeviceImporter;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\UploadedFile;
 
+use SNMP;
 use DateTime;
 use App\Models\Device;
+
+use DRP\DeviceImporter\DeviceImporter;
+use DRP\DeviceImporter\FileManager;
 use DRP\DeviceImporter\SNMPTester;
 use DRP\DeviceImporter\ImportSettings;
-use SNMP;
+
 
 /**
  * Action Controller
@@ -95,18 +99,10 @@ class ActionController extends Controller {
             return $this->redirect('invalid_file');
         }
 
-        $date = new DateTime();
-        $safeName = $date->format('YmdHis') . "-device-import-src.csv";
+        $obj = new FileManager();
+        $status = $obj->addFile($file);
+        Log::debug("FileManager Status: " . PHP_EOL . print_r($status, true));
 
-        $path = $file->storeAs('uploads', $safeName);
-
-        if (empty($path) | !$path) {
-            return $this->redirect('upload_failed');
-        }
-
-        $uploadFiles = $this->settings->get('upload_files', []);
-        $uploadFiles[$safeName] = true;
-        $this->settings->set('upload_files', $uploadFiles);
 
         /*
         $contents = explode(PHP_EOL, $file->get());

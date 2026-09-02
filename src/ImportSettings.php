@@ -115,4 +115,12 @@ class ImportSettings {
             return false;
         }
     }
+
+    public function reset() {
+        $this->settings = [];
+        if (!is_null($this->plugin)) {
+            $this->plugin->settings = $this->settings;
+            $this->plugin->save();
+        }
+    }
 }
