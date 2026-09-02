@@ -19,7 +19,12 @@ use DRP\DeviceImporter\DeviceImporter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\UploadedFile;
+
 use DateTime;
+use App\Models\Device;
+use DRP\DeviceImporter\SNMPTester;
+use DRP\DeviceImporter\ImportSettings;
+use SNMP;
 
 /**
  * Action Controller
@@ -32,7 +37,15 @@ use DateTime;
  * @since       1.0.0
  */
 class ActionController extends Controller {
+
+
+    private array $headersRequired = [];
+    private array $map = [];
+    private ImportSettings $settings;
+
     public function __construct() {
+        $this->headersRequired = ['hostname', 'ip_address', 'os'];
+        $this->settings = new ImportSettings();
     }
 
     public function handle(Request $request) {
@@ -82,60 +95,123 @@ class ActionController extends Controller {
             return $this->redirect('invalid_file');
         }
 
-        Log::debug('FILE', [$file]);
-
-        // Process the CSV file here
-        // ...
-
-
-        Log::debug('CSV: ', $job);
-
         $date = new DateTime();
-        $safeName = $date->format('YmdHis') . "-device-import.csv";
-
-        $this->addJob($file->get());
+        $safeName = $date->format('YmdHis') . "-device-import-src.csv";
 
         $path = $file->storeAs('uploads', $safeName);
 
+        if (empty($path) | !$path) {
+            return $this->redirect('upload_failed');
+        }
 
+        $uploadFiles = $this->settings->get('upload_files', []);
+        $uploadFiles[$safeName] = true;
+        $this->settings->set('upload_files', $uploadFiles);
 
+        /*
+        $contents = explode(PHP_EOL, $file->get());
+
+        $this->processUpload($contents);
+        return $this->redirect('success');
+
+        $contents = explode(PHP_EOL, $file->get());
+
+        $this->processUpload($contents);
+        */
         return $this->redirect('success');
     }
 
-    private function addJob(string $payload) {
-        try {
-            $job = [];
-            $job['queue'] = 'device_import';
-            $job['payload'] = $payload;
 
-            $job['attempts'] = 0;
-            $job['reserved_at'] = null;
-            $job['available_at'] = time();
-            $job['created_at'] = time();
-            config(['queue.connections.database.table' => 'plugin_jobs']);
-            dispatch(new \DRP\DeviceImporter\Jobs\ImportDataJob($job));
 
-            Log::debug('JOB: ', $job);
-        } catch (\Throwable $th) {
-            Log::error('Failed to add job', ['exception' => $th]);
+    private function processUpload(array $data) {
+
+        $header = explode(',', array_shift($data));
+        $this->parseCsvHeader($header);
+
+        Log::debug('CSV Header Map: ' . print_r($map, true));
+        Log::debug('CSV Header: ' . print_r($header, true));
+        Log::debug('CSV Data: ' . print_r($data, true));
+
+
+        foreach ($data as $key => $value) {
+            $mappedData = $this->parseCsvLine($value);
+            /*
+            $line = explode(',', $value);
+
+            foreach ($this->map as $column => $index) {
+                $mappedData[$index] = trim($line[$index]);
+            }
+            */
+            Log::debug('Mapped Data: ' . print_r($mappedData, true));
         }
+
+        /*
+        [hostname] => wainwright-sw10g-01.oklatel.net
+        [ip_address] => 10.30.32.5
+        [os] => Cisco IOS
+        */
+
+
+
+        $obj = new SNMPTester();
+        $result = $obj->test('10.13.10.4', 'moly560311', '2c');
+        Log::debug('SNMP Test Result: ' . print_r($result, true));
+        //SNMPTester::test($mappedData['hostname'], 'public', 2);
     }
+
+    private function parseCsvLine(string $line) {
+
+        $line = explode(',', $line);
+        $mappedData = [];
+        foreach ($this->map as $column => $index) {
+
+            $clean = preg_replace('/^["\'](.*)["\']$/', '$1', $line[$index]);
+            $mappedData[$column] = trim($clean);
+        }
+
+
+
+
+
+
+        return $mappedData;
+    }
+
+    private function parseCsvHeader(array $header) {
+
+        foreach ($header as $key => $column) {
+            Log::debug('CSV Column: ' . $column);
+            $column = trim($column);
+            $column = strtolower($column);
+            $column = str_replace(' ', '_', $column);
+            $column = preg_replace('/^["\'](.*)["\']$/', '$1', $column);
+            $header[$key] = $column;
+        }
+
+        Log::debug('Header: ' . print_r($header, true));
+
+        $map = [];
+
+        foreach ($header as $key => $column) {
+            Log::debug('Mapping column: ' . $column);
+            if (in_array($column, $this->headersRequired)) {
+                $map[$column] = $key;
+            }
+        }
+
+        $this->map = $map;
+    }
+
 
     private function redirect(?string $status = null) {
 
         $query = [];
 
-
         if ($status !== null) {
             $query['status'] = $status;
         }
 
-
-
         $path = url('plugin/' . DeviceImporter::PLUGIN);
-
-
-
         return redirect($path . ($query ? '?' . http_build_query($query) : ''));
     }
 }

@@ -9,8 +9,12 @@
         @csrf
         <input type="hidden" name="action" value="upload">
 
-        <input type="file" name="csv" accept=".csv">
-        <button type="submit" class="btn btn-primary">Upload CSV</button>
+
+            <div class="form-group">
+                <input class="form-control col-md-6" type="file" name="csv" accept=".csv" style="max-width: 150px; margin-bottom: 10px;">
+                <button type="submit" class="btn btn-primary">Upload CSV</button>
+            </div>
+
     </form>
 
 </div>

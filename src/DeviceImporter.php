@@ -14,6 +14,7 @@
 namespace DRP\DeviceImporter;
 
 use App\Models\Plugin;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Importer for the Device Importer plugin.
@@ -59,11 +60,17 @@ class DeviceImporter {
     /**
      * Get plugin object model.
      *
-     * @return mixed
-     *
+     * @return Plugin
      * @version 1.0.0
      */
-    private static function getPlugin() {
-        return Plugin::where('plugin_name', self::PLUGIN)->first();
+    public static function getPlugin(): Plugin|null {
+        $result = Plugin::where('plugin_name', self::PLUGIN)->first();
+
+        // Check if the plugin exists in the database.
+        if (is_null($result)) {
+            Log::error('Plugin not found: ' . self::PLUGIN);
+            return null;
+        }
+        return $result;
     }
 }

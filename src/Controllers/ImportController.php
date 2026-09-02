@@ -15,7 +15,6 @@ namespace DRP\DeviceImporter\Controllers;
 
 
 use Illuminate\Routing\Controller;
-//use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use DRP\DeviceImporter\DeviceImporter;
 
@@ -29,7 +28,7 @@ use DRP\DeviceImporter\DeviceImporter;
  * @link        https://github.com/daryl-peterson/
  * @since       1.0.0
  */
-class DeviceImportController extends Controller {
+class ImportController extends Controller {
 
     const CONTROLLER_PATH = 'plugin/device-importer';
 
