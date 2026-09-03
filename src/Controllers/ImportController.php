@@ -45,6 +45,11 @@ class ImportController extends Controller {
 
     public function upload(): View {
         $data = DeviceImporter::getInfo();
-        return view('device-importer::upload');
+        return view('device-importer::upload', ['info' => $data]);
+    }
+
+    public function settings(): View {
+        $data = DeviceImporter::getInfo();
+        return view('device-importer::settings', ['info' => $data]);
     }
 }

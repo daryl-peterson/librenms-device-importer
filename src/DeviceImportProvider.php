@@ -21,6 +21,8 @@ use LibreNMS\Interfaces\Plugins\Hooks\MenuEntryHook as MenuEntryHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SettingsHook as SettingsHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SinglePageHook;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 use DRP\DeviceImporter\Hooks\DeviceOverview;
 use DRP\DeviceImporter\Hooks\Menu;
 use DRP\DeviceImporter\Hooks\Page;
@@ -64,13 +66,28 @@ class DeviceImportProvider extends ServiceProvider {
          * Package views can also be referenced as:
          * device-importer::page
          */
+
+        $rootPath = base_path();
+        $viewPath = $rootPath . '/vendor/daryl-peterson/librenms-device-importer/resources/views';
         $paths = [
             __DIR__ . '/..',
-            __DIR__ . '/../resources/views'
+            __DIR__ . '/../resources/views',
+            $viewPath,
+
         ];
+        Log::debug('View paths: ' . PHP_EOL . print_r($paths, true));
+
+        //$this->loadViewsFrom(__DIR__ . '/../resources/views', 'device-importer');
+
+
         $this->loadViewsFrom($paths, 'device-importer');
+        //$this->loadViewsFrom(__DIR__ . '/../resources/views', 'librenms-device-importer');
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+
+        $paths = View::getFinder()->getPaths();
+        Log::debug('Current view paths: ' . PHP_EOL . print_r($paths, true));
+
 
         $pluginManager = $this->app->make(PluginManagerInterface::class);
         $pluginManager->publishHook($pluginName, DeviceOverviewHookInterface::class, DeviceOverview::class);

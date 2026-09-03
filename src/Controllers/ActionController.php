@@ -13,10 +13,7 @@
 
 namespace DRP\DeviceImporter\Controllers;
 
-use App\Models\Device;
-
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -26,6 +23,8 @@ use DRP\DeviceImporter\ImportSettings;
 use DRP\DeviceImporter\Jobs\ImportDeviceJob;
 use DRP\DeviceImporter\SNMPTester;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 
 /**
  * Action Controller
@@ -62,11 +61,23 @@ class ActionController extends Controller {
 
         return match ($action) {
             'upload' => $this->upload($request,),
-            default => $this->redirect('unknown_action'),
+            'save' => $this->save($request),
+            default => $this->redirect(
+                null,
+                'unknown_action'
+            ),
         };
     }
 
-    public function upload(Request $request) {
+
+    /**
+     * Handle the upload action.
+     *
+     * @param Request $request
+     * @return Redirector|RedirectResponse
+     * @since 1.0.0
+     */
+    public function upload(Request $request): Redirector|RedirectResponse {
         Log::debug('Upload action initiated by user: ' . Auth::id());
 
 
@@ -78,12 +89,20 @@ class ActionController extends Controller {
 
         Log::debug('CSV file: ', [$file]);
         if (empty($file)) {
-            return $this->redirect('no_file');
+            return $this->redirect(
+                null,
+                'error',
+                'No file uploaded'
+            );
         }
 
         // Check if the file is valid
         if (! $file->isValid()) {
-            return $this->redirect('invalid_file');
+            return $this->redirect(
+                null,
+                'error',
+                'Invalid file'
+            );
         }
 
         $request->validate([
@@ -93,19 +112,47 @@ class ActionController extends Controller {
         $mimeType = $file->getMimeType($file);
         Log::debug('CSV MIME type: ' . $mimeType);
         if ($mimeType !== 'text/csv') {
-            return $this->redirect('invalid_file');
+            return $this->redirect(
+                null,
+                'error',
+                'Invalid file'
+            );
         }
 
         FileManager::deleteAll();
         $fileName = FileManager::addFile($file);
-
 
         ImportDeviceJob::dispatch($fileName);
         Artisan::call('queue:work', [
             '--stop-when-empty' => true,
             '--tries' => 3,
         ]);
-        return $this->redirect('success');
+        return $this->redirect(
+            route('device-importer.upload'),
+            'success',
+            'File uploaded successfully'
+        );
+    }
+
+    /**
+     * Save settings
+     *
+     * @param Request $request
+     * @return Redirector|RedirectResponse
+     * @since 1.0.0
+     */
+    public function save(Request $request): Redirector|RedirectResponse {
+
+        $communities = $request->input('communities', '');
+
+        $obj = new ImportSettings();
+        $obj->set('communities', $communities);
+
+        return $this->redirect(
+            route('device-importer.settings'),
+            'success',
+            'Settings saved successfully'
+        );
     }
 
 
@@ -155,12 +202,6 @@ class ActionController extends Controller {
             $clean = preg_replace('/^["\'](.*)["\']$/', '$1', $line[$index]);
             $mappedData[$column] = trim($clean);
         }
-
-
-
-
-
-
         return $mappedData;
     }
 
@@ -190,15 +231,29 @@ class ActionController extends Controller {
     }
 
 
-    private function redirect(?string $status = null) {
+    /**
+     * Do redirect to the plugin page with an optional status.
+     *
+     * @param string|null $url The URL to redirect to.
+     * @param string|null $type The type of message (e.g., 'error', 'success').
+     * @param string|null $message The message to display after the redirect.
+     * @return Redirector|RedirectResponse
+     */
+    private function redirect(
+        ?string $url = null,
+        ?string $type = null,
+        ?string $message = null
+    ): Redirector|RedirectResponse {
 
         $query = [];
 
-        if ($status !== null) {
-            $query['status'] = $status;
+        if (is_null($url)) {
+            $url = url('plugin/' . DeviceImporter::PLUGIN);
         }
 
-        $path = url('plugin/' . DeviceImporter::PLUGIN);
-        return redirect($path . ($query ? '?' . http_build_query($query) : ''));
+        if ($type !== null) {
+            return redirect($url)->with($type, $message);
+        }
+        return redirect($url);
     }
 }

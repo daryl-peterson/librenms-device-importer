@@ -1,35 +1,34 @@
-<div class="panel panel-default" style="margin: 2em"></div>
-        <div class="row">
-            <div class="col-md-8 col-md-offset-2">
-
-                <!-- Main Form Card -->
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title"><i class="fa fa-cog"></i> File Uploader Settings</h3>
-                    </div>
-                    <div class="panel-body">
-
-                        <form method="POST" enctype="multipart/form-data">
+@extends('layouts.librenmsv1')
 
 
-                            <div class="form-group">
-                                <label for="plugin_config_file">Upload Configuration File</label>
-                                <input type="file" id="plugin_config_file" name="plugin_config_file" class="form-control-file">
-                                <p class="help-block">Accepted formats: .json, .txt, .csv, .yaml (Max size: 2MB).</p>
-                            </div>
+@section('content')
+    <div style="margin-top:-12px; padding-bottom: 1em;">
+        @includeIf('device-importer::layouts.flash-messages')
+    </div>
+    <div class="container-fluid">
 
-                            <hr>
-
-                            <div class="form-group clearfix">
-                                <button type="submit" class="btn btn-primary pull-right">
-                                    <i class="fa fa-upload"></i> Upload & Save
-                                </button>
-                            </div>
-                        </form>
-
-                    </div>
+        <div class="col-sm-12 col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    @includeIf('device-importer::partials.menu')
                 </div>
+                <div class="panel-body">
+                    @includeIf('device-importer::partials.author')
 
+                    <form method="POST" action="{{ url('plugin/device-importer/action') }}" enctype="multipart/form-data">
+                        @csrf
+
+                        <input type="hidden" name="action" value="save">
+                        <div class="form-group">
+                            <label for="communities">SNMP Communities (Comma-Separated)</label>
+                            <input type="text" class="form-control" id="communities" name="communities"
+                                value="{{ $info['settings']['communities'] ?? '' }}" placeholder="community1, community2, community3">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary pull-right">Save Settings</button>
+                    </form>
+                </div>
             </div>
         </div>
-</div>
+    </div>
+@endsection

@@ -123,4 +123,22 @@ class ImportSettings {
             $this->plugin->save();
         }
     }
+
+    public function delete(string $key): bool {
+        try {
+            if (isset($this->settings[$key])) {
+                unset($this->settings[$key]);
+            }
+
+            if (is_null($this->plugin)) {
+                return false;
+            }
+
+            $this->plugin->settings = $this->settings;
+            return $this->plugin->save();
+        } catch (\Exception $e) {
+            Log::error('Failed to delete plugin setting: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

@@ -41,19 +41,23 @@ class DeviceImporter {
     /**
      * Get plugin information.
      *
-     * @return array{name: '', title: '', author: '', ver: '', settings: mixed, plugin: mixed}
+     * @return array{name: '',title: '',author: '',ver: '',settings: string,page: string,plugin: Plugin,redis: bool}
      *
      * @version 1.0.0
      */
     public static function getInfo() {
 
+        $redisAvailable = checkRedis();
         return array(
             'name'     => self::PLUGIN,
             'title'    => self::TITLE,
             'author'   => self::AUTHOR,
             'ver'      => self::VER,
-            'settings' => route('plugin.settings', self::PLUGIN),
+            'settings' => self::getSettings(),
+            'rt-settings' => route('plugin.settings', self::PLUGIN),
+            'rt-page'     => route('plugin.page', self::PLUGIN),
             'plugin'   => self::getPlugin(),
+            'redis' => $redisAvailable,
         );
     }
 
@@ -72,5 +76,11 @@ class DeviceImporter {
             return null;
         }
         return $result;
+    }
+
+    public static function getSettings(): array {
+        $obj = new ImportSettings();
+        $settings = $obj->all();
+        return $settings ?? [];
     }
 }

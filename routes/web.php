@@ -22,5 +22,10 @@ if (checkRedis()) {
 
 
 Route::middleware(['web'])
+    ->get('plugin/settings/device-importer', [ImportController::class, 'settings'])
+    ->name('device-importer.settings');
+
+
+Route::middleware(['web'])
     ->post('plugin/device-importer/action', [ActionController::class, 'handle'])
     ->name('device-importer.action');
