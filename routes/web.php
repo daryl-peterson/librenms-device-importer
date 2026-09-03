@@ -6,7 +6,7 @@ use DRP\DeviceImporter\Controllers\ImportController;
 use DRP\DeviceImporter\Controllers\ActionController;
 
 
-
+use function DRP\DeviceImporter\checkRedis;
 /*
 
 Route::middleware(['web'])
@@ -14,10 +14,13 @@ Route::middleware(['web'])
     ->name('device-importer.index');
 */
 
-Route::middleware(['web'])
-	->get('plugin/device-importer/upload', [ImportController::class, 'upload'])
-	->name('device-importer.upload');
+if (checkRedis()) {
+    Route::middleware(['web'])
+        ->get('plugin/device-importer/upload', [ImportController::class, 'upload'])
+        ->name('device-importer.upload');
+}
+
 
 Route::middleware(['web'])
-	->post('plugin/device-importer/action', [ActionController::class, 'handle'])
-	->name('device-importer.action');
+    ->post('plugin/device-importer/action', [ActionController::class, 'handle'])
+    ->name('device-importer.action');

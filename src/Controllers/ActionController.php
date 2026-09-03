@@ -13,21 +13,19 @@
 
 namespace DRP\DeviceImporter\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\UploadedFile;
-
-
 use App\Models\Device;
 
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use DRP\DeviceImporter\DeviceImporter;
 use DRP\DeviceImporter\FileManager;
-use DRP\DeviceImporter\SNMPTester;
 use DRP\DeviceImporter\ImportSettings;
-
+use DRP\DeviceImporter\Jobs\ImportDeviceJob;
+use DRP\DeviceImporter\SNMPTester;
+use Illuminate\Support\Facades\Artisan;
 
 /**
  * Action Controller
@@ -98,12 +96,15 @@ class ActionController extends Controller {
             return $this->redirect('invalid_file');
         }
 
-        $obj = new FileManager();
-        $status = $obj->addFile($file);
-        Log::debug("FileManager Status: " . PHP_EOL . print_r($status, true));
+        FileManager::deleteAll();
+        $fileName = FileManager::addFile($file);
 
 
-
+        ImportDeviceJob::dispatch($fileName);
+        Artisan::call('queue:work', [
+            '--stop-when-empty' => true,
+            '--tries' => 3,
+        ]);
         return $this->redirect('success');
     }
 

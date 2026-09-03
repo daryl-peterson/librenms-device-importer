@@ -1,3 +1,9 @@
+@php
+    use function DRP\DeviceImporter\checkRedis;
+    $redisAvailable = checkRedis();
+@endphp
+
+
 <div class="panel panel-default" style="margin: 2em">
     <div class="panel-body ">
         <img class="device-icon-header pull-left img-circle" style="vertical-align:middle"
@@ -14,7 +20,9 @@
             <div class="pull-left">
                 <div style="margin-top: 2em" class="d-inline">
                     <a href="{{ $info['settings'] }}" class="btn btn-primary btn-lg" role="button">Settings</a>
+                    @if ($redisAvailable)
                     <a href="{{ route('device-importer.upload') }}" class="btn btn-primary btn-lg" role="button">Upload</a>
+                    @endif
                 </div>
             </div>
 

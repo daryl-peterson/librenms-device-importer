@@ -30,26 +30,18 @@ use Illuminate\Support\Facades\Log;
 class FileManager {
     use TraitHidePrivates;
 
-
-    private ImportSettings $settings;
-
-    public function __construct() {
-        $this->settings = new ImportSettings();
-    }
-
     /**
      * Add a file to the uploads directory.
      *
      * @param UploadedFile|array $file
-     * @return ?FileManagerStatus
+     * @return string|array|null
      * @since 1.0.0
      */
-    public function addFile(UploadedFile|array $file): ?FileManagerStatus {
-        $status = null;
+    public static function addFile(UploadedFile|array $file): string|array|null {
+        $fileName = null;
         try {
             if ($file instanceof UploadedFile) {
-                $fileName = $this->storeFile($file);
-                $status = new FileManagerStatus($fileName);
+                $fileName = self::storeFile($file);
             } elseif (is_array($file)) {
                 // Handle multiple file uploads
             }
@@ -59,7 +51,7 @@ class FileManager {
             return null;
         }
 
-        return $status;
+        return $fileName;
     }
 
     /**
@@ -69,7 +61,7 @@ class FileManager {
      * @return boolean
      * @since 1.0.0
      */
-    public function deleteFile(string $fileName): bool {
+    public static function deleteFile(string $fileName): bool {
         try {
             $fileName = basename($fileName);
             $path = storage_path('uploads/' . $fileName);
@@ -85,6 +77,23 @@ class FileManager {
         return false;
     }
 
+    public static function deleteAll() {
+
+        try {
+            $directory = "../storage/app/uploads/";
+            $files = glob($directory . "*device-import-src.csv");
+            Log::debug('Files to delete: ' . PHP_EOL . print_r($files, true));
+
+            foreach ($files as $file) {
+                unlink($file);
+            }
+            Log::debug('All files deleted successfully.');
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            Log::error($th->getTraceAsString());
+        }
+    }
+
     /**
      * Store a file in the uploads directory.
      *
@@ -93,7 +102,7 @@ class FileManager {
      *
      * @since 1.0.0
      */
-    private function storeFile(UploadedFile $file): ?string {
+    private static function storeFile(UploadedFile $file): ?string {
         $date = new DateTime();
         $safeName = $date->format('YmdHis') . "-device-import-src.csv";
 

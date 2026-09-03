@@ -13,17 +13,20 @@
 
 namespace DRP\DeviceImporter;
 
-use Illuminate\Support\ServiceProvider;
+use LibreNMS\Plugins;
+
 use LibreNMS\Interfaces\Plugins\PluginManagerInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\DeviceOverviewHook as DeviceOverviewHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\MenuEntryHook as MenuEntryHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SettingsHook as SettingsHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SinglePageHook;
+use Illuminate\Support\ServiceProvider;
 use DRP\DeviceImporter\Hooks\DeviceOverview;
 use DRP\DeviceImporter\Hooks\Menu;
 use DRP\DeviceImporter\Hooks\Page;
 use DRP\DeviceImporter\Hooks\Settings;
-use LibreNMS\Plugins;
+
+
 
 /**
  * Device import service provider.
@@ -43,7 +46,14 @@ class DeviceImportProvider extends ServiceProvider {
     public function boot(): void {
         $pluginName = 'device-importer';
 
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'device-importer');
+        $hasRedis = checkRedis();
+        if (! $hasRedis) {
+            $obj = new ImportSettings();
+            $obj->set('redis', false);
+        } else {
+            config(['queue.default' => 'redis']);
+        }
+
 
         /*
          * Compatibility view path.
@@ -54,10 +64,12 @@ class DeviceImportProvider extends ServiceProvider {
          * Package views can also be referenced as:
          * device-importer::page
          */
-        $this->loadViewsFrom(__DIR__ . '/..', 'device-importer');
-
+        $paths = [
+            __DIR__ . '/..',
+            __DIR__ . '/../resources/views'
+        ];
+        $this->loadViewsFrom($paths, 'device-importer');
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         $pluginManager = $this->app->make(PluginManagerInterface::class);
