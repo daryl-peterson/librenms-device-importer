@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 function checkRedis(): bool {
+
     try {
         $redis = Redis::connection();
         $redis->ping();
