@@ -88,34 +88,42 @@ class ActionController extends Controller {
         $file = $request->file('csv');
 
         Log::debug('CSV file: ', [$file]);
+        $url = route('device-importer.upload');
         if (empty($file)) {
+            $type = 'error';
+            $message = 'No file uploaded';
             return $this->redirect(
-                null,
-                'error',
-                'No file uploaded'
+                $url,
+                $type,
+                $message
             );
         }
 
         // Check if the file is valid
         if (! $file->isValid()) {
+            $type = 'error';
+            $message = 'Invalid file upload';
             return $this->redirect(
-                null,
-                'error',
-                'Invalid file'
+                $url,
+                $type,
+                $message
             );
         }
 
-        $request->validate([
+        $return = $request->validate([
             'csv' => 'required|file|mimes:csv,txt',
         ]);
+        Log::debug('Validation result: ', [$return]);
 
         $mimeType = $file->getMimeType($file);
         Log::debug('CSV MIME type: ' . $mimeType);
         if ($mimeType !== 'text/csv') {
+            $type = 'error';
+            $message = 'Invalid file';
             return $this->redirect(
-                null,
-                'error',
-                'Invalid file'
+                $url,
+                $type,
+                $message
             );
         }
 
@@ -128,7 +136,7 @@ class ActionController extends Controller {
             '--tries' => 3,
         ]);
         return $this->redirect(
-            route('device-importer.upload'),
+            $url,
             'success',
             'File uploaded successfully'
         );
@@ -144,14 +152,19 @@ class ActionController extends Controller {
     public function save(Request $request): Redirector|RedirectResponse {
 
         $communities = $request->input('communities', '');
+        $result = $this->settings->set('communities', $communities);
 
-        $obj = new ImportSettings();
-        $obj->set('communities', $communities);
+        $type = 'success';
+        $message = 'Settings saved successfully';
+        if (!$result) {
+            $type = 'error';
+            $message = 'Failed to save settings';
+        }
 
         return $this->redirect(
             route('device-importer.settings'),
-            'success',
-            'Settings saved successfully'
+            $type,
+            $message
         );
     }
 

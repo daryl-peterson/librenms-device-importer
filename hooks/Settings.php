@@ -31,6 +31,8 @@ use DRP\DeviceImporter\DeviceImporter;
  */
 class Settings extends SettingsHook {
 
+    public function hook() {
+    }
 
     /**
      * Get the data for the settings view.
