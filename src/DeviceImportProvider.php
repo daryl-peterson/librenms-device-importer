@@ -58,6 +58,8 @@ class DeviceImportProvider extends ServiceProvider {
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+
         $pluginManager = $this->app->make(PluginManagerInterface::class);
         $pluginManager->publishHook($pluginName, DeviceOverviewHookInterface::class, DeviceOverview::class);
         $pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
