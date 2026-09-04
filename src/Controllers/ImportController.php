@@ -13,7 +13,7 @@
 
 namespace DRP\DeviceImporter\Controllers;
 
-
+use Illuminate\Support\Facades\Log;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use DRP\DeviceImporter\DeviceImporter;
@@ -39,16 +39,18 @@ class ImportController extends Controller {
         $contents = (array) file_get_contents($filepath);
         Log::alert('CONTESTS', $contents);
         */
-
-        return view('device-importer::page');
+        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
+        return view('device-importer::page')->with('error', 'Your custom error message goes here.');
     }
 
     public function upload(): View {
+        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
         $data = DeviceImporter::getInfo();
         return view('device-importer::upload', ['info' => $data]);
     }
 
     public function settings(): View {
+        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
         $data = DeviceImporter::getInfo();
         return view('device-importer::settings', ['info' => $data]);
     }

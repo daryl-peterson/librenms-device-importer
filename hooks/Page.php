@@ -15,6 +15,7 @@ namespace DRP\DeviceImporter\Hooks;
 
 use App\Plugins\Hooks\PageHook;
 use DRP\DeviceImporter\DeviceImporter;
+use Illuminate\Support\Facades\Log;
 
 
 /**
@@ -29,7 +30,11 @@ use DRP\DeviceImporter\DeviceImporter;
  */
 class Page extends PageHook {
 
-    public function data(): array {
+    public function data($settings = []): array {
+        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
+        session()->put('error', 'Your custom error message goes here.');
+        session(['error' => 'Your custom error message goes here.']);
+
 
         return [
             'info' => DeviceImporter::getInfo(),

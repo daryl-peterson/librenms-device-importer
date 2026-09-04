@@ -77,8 +77,6 @@ class DeviceImportProvider extends ServiceProvider {
         ];
         Log::debug('View paths: ' . PHP_EOL . print_r($paths, true));
 
-        //$this->loadViewsFrom(__DIR__ . '/../resources/views', 'device-importer');
-
 
         $this->loadViewsFrom($paths, 'device-importer');
         //$this->loadViewsFrom(__DIR__ . '/../resources/views', 'librenms-device-importer');
@@ -90,6 +88,8 @@ class DeviceImportProvider extends ServiceProvider {
 
 
         $pluginManager = $this->app->make(PluginManagerInterface::class);
+
+        Log::debug('Plugin Manager: ' . PHP_EOL . print_r($pluginManager, true));
         $pluginManager->publishHook($pluginName, DeviceOverviewHookInterface::class, DeviceOverview::class);
         $pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
         $pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
