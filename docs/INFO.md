@@ -1,6 +1,21 @@
+
+# LibreNMS Developement Notes
+
+## Add to plugin to Composer
+
+```bash
+composer config --global repositories.example-plugin '{"type": "path", "url": "/full/path/to/librenms-example-plugin", "symlink": true}'
+```
+
+## Execute lmns command to add it to framework
+
+```bash
+lnms plugin:add daryl-peterson/librenms-tickets @dev
+```
+
 ## Edit composer.json append to end of file
 
-```
+```bash
 "repositories": [
     {
         "type": "path",
@@ -24,9 +39,9 @@ composer require daryl-peterson/librenms-device-importer:dev-main
 
 FORCE=1 composer install
 
-https://github.com/WizballESY/librenms-device-photo/tree/main
+see <https://github.com/WizballESY/librenms-device-photo/tree/main>
 
-https://github.com/murrant/librenms-example-plugin
+see <https://github.com/murrant/librenms-example-plugin>
 
 ## Clear Views
 
@@ -35,15 +50,13 @@ php artisan view:clear
 
 ## Other Plugin samples
 
-https://github.com/WizballESY/librenms-device-photo/tree/main
-[https://github.com/murrant/librenms-example-plugin]()
+see <https://github.com/WizballESY/librenms-device-photo/tree/main>
+see <https://github.com/murrant/librenms-example-plugin>
 
 ## Git create tag and push
 
 git tag v0.1.0-alpha.01
 git push origin v0.1.0-alpha.01
-
-
 
 ## Migrate
 

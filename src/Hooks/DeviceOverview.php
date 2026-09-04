@@ -15,6 +15,7 @@ namespace DRP\DeviceImporter\Hooks;
 
 use App\Models\Device;
 use App\Plugins\Hooks\DeviceOverviewHook;
+use DRP\DeviceImporter\TraitHidePrivates;
 
 /**
  * LibreNMS Device Importer Device Overview Hook
@@ -27,6 +28,7 @@ use App\Plugins\Hooks\DeviceOverviewHook;
  * @since       0.0.1
  */
 class DeviceOverview extends DeviceOverviewHook {
+    use TraitHidePrivates;
 
 
     public function data(\App\Models\Device $device): array {
