@@ -7,7 +7,7 @@
  * @author      Daryl Peterson <@gmail.com>
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 
 namespace DRP\DeviceImporter;
@@ -22,13 +22,11 @@ namespace DRP\DeviceImporter;
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 class ProcessCSV {
 
-    public function __construct()
-    {
-        # Code Here
-    }
+	public function __construct() {
+		# Code Here
+	}
 }
-

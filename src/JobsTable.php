@@ -8,7 +8,7 @@
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 
 namespace DRP\DeviceImporter;
@@ -26,23 +26,23 @@ use Illuminate\Database\Schema\Blueprint;
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 class JobsTable {
 
-    public string $table = 'jobs';
+	public string $table = 'jobs';
 
-    public static function create() {
-        if (!Schema::hasTable('jobs')) {
-            Schema::create('jobs', function (Blueprint $table) {
-                $table->bigIncrements('id');
-                $table->string('queue')->index();
-                $table->longText('payload');
-                $table->unsignedTinyInteger('attempts');
-                $table->unsignedInteger('reserved_at')->nullable();
-                $table->unsignedInteger('available_at');
-                $table->unsignedInteger('created_at');
-            });
-        }
-    }
+	public static function create() {
+		if (!Schema::hasTable('jobs')) {
+			Schema::create('jobs', function (Blueprint $table) {
+				$table->bigIncrements('id');
+				$table->string('queue')->index();
+				$table->longText('payload');
+				$table->unsignedTinyInteger('attempts');
+				$table->unsignedInteger('reserved_at')->nullable();
+				$table->unsignedInteger('available_at');
+				$table->unsignedInteger('created_at');
+			});
+		}
+	}
 };

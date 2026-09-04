@@ -8,13 +8,16 @@
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 
 namespace DRP\DeviceImporter\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use DRP\DeviceImporter\DeviceImporter;
@@ -22,9 +25,7 @@ use DRP\DeviceImporter\FileManager;
 use DRP\DeviceImporter\ImportSettings;
 use DRP\DeviceImporter\Jobs\ImportDeviceJob;
 use DRP\DeviceImporter\SNMPTester;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
+use DRP\DeviceImporter\TraitHidePrivates;
 
 /**
  * Action Controller
@@ -34,10 +35,10 @@ use Illuminate\Routing\Redirector;
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 class ActionController extends Controller {
-
+    use TraitHidePrivates;
 
     private array $headersRequired = [];
     private array $map = [];
@@ -75,7 +76,7 @@ class ActionController extends Controller {
      *
      * @param Request $request
      * @return Redirector|RedirectResponse
-     * @since 1.0.0
+     * @since 0.0.1
      */
     public function upload(Request $request): Redirector|RedirectResponse {
         Log::debug('Upload action initiated by user: ' . Auth::id());
@@ -147,7 +148,7 @@ class ActionController extends Controller {
      *
      * @param Request $request
      * @return Redirector|RedirectResponse
-     * @since 1.0.0
+     * @since 0.0.1
      */
     public function save(Request $request): Redirector|RedirectResponse {
 

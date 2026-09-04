@@ -8,7 +8,7 @@
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 
 namespace DRP\DeviceImporter\Hooks;
@@ -25,14 +25,14 @@ use DRP\DeviceImporter\DeviceImporter;
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 class Page extends PageHook {
 
-    public function data(): array {
+	public function data(): array {
 
-        return [
-            'info' => DeviceImporter::getInfo(),
-        ];
-    }
+		return [
+			'info' => DeviceImporter::getInfo(),
+		];
+	}
 }

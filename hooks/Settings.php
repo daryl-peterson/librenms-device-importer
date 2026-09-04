@@ -8,7 +8,7 @@
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 
 namespace DRP\DeviceImporter\Hooks;
@@ -27,25 +27,25 @@ use DRP\DeviceImporter\DeviceImporter;
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 class Settings extends SettingsHook {
 
-    public function hook() {
-    }
+	public function hook() {
+	}
 
-    /**
-     * Get the data for the settings view.
-     *
-     * @param array $settings The current settings stored in the database.
-     * @return array The data to be passed to the settings view.
-     */
-    public function data2(): array {
-        $info = DeviceImporter::getInfo();
+	/**
+	 * Get the data for the settings view.
+	 *
+	 * @param array $settings The current settings stored in the database.
+	 * @return array The data to be passed to the settings view.
+	 */
+	public function data2(): array {
+		$info = DeviceImporter::getInfo();
 
-        return [
-            'info' => $info,
-            'settings' => $info['settings'],
-        ];
-    }
+		return [
+			'info' => $info,
+			'settings' => $info['settings'],
+		];
+	}
 }

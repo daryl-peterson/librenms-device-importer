@@ -8,7 +8,7 @@
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 
 namespace DRP\DeviceImporter;
@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Log;
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 class DeviceImporter {
 
@@ -54,8 +54,10 @@ class DeviceImporter {
             'author'   => self::AUTHOR,
             'ver'      => self::VER,
             'settings' => self::getSettings(),
-            'rt-settings' => route('plugin.settings', self::PLUGIN),
-            'rt-page'     => route('plugin.page', self::PLUGIN),
+            'routes'   => [
+                'settings' => route('plugin.settings', self::PLUGIN),
+                'page'     => route('plugin.page', self::PLUGIN),
+            ],
             'plugin'   => self::getPlugin(),
             'redis' => $redisAvailable,
         );

@@ -7,7 +7,7 @@
  * @author      Daryl Peterson <@gmail.com>
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 
 namespace DRP\DeviceImporter\Jobs;
@@ -27,25 +27,25 @@ use Illuminate\Support\Facades\Log;
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 class ImportDeviceJob implements ShouldQueue {
-    use Dispatchable, InteractsWithQueue, SerializesModels;
+	use Dispatchable, InteractsWithQueue, SerializesModels;
 
-    protected array $data;
+	protected array $data;
 
-    protected string $fileName;
+	protected string $fileName;
 
 
 
-    public function __construct(string $fileName) {
-        $this->fileName = $fileName;
-        config(['queue.default' => 'redis']);
-    }
+	public function __construct(string $fileName) {
+		$this->fileName = $fileName;
+		config(['queue.default' => 'redis']);
+	}
 
-    public function handle() {
-        // Process the data here
-        // ...
-        Log::debug('Processing file: ', [$this->fileName]);
-    }
+	public function handle() {
+		// Process the data here
+		// ...
+		Log::debug('Processing file: ', [$this->fileName]);
+	}
 }

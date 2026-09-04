@@ -8,7 +8,7 @@
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 
 namespace DRP\DeviceImporter\Hooks;
@@ -26,18 +26,18 @@ use Illuminate\Support\Facades\Log;
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
- * @since       1.0.0
+ * @since       0.0.1
  */
 class Page extends PageHook {
 
-    public function data($settings = []): array {
-        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
-        session()->put('error', 'Your custom error message goes here.');
-        session(['error' => 'Your custom error message goes here.']);
+	public function data($settings = []): array {
+		Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
+		session()->put('error', 'Your custom error message goes here.');
+		session(['error' => 'Your custom error message goes here.']);
 
 
-        return [
-            'info' => DeviceImporter::getInfo(),
-        ];
-    }
+		return [
+			'info' => DeviceImporter::getInfo(),
+		];
+	}
 }
