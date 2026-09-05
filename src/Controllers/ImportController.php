@@ -14,6 +14,7 @@
 namespace DRP\DeviceImporter\Controllers;
 
 use Illuminate\Support\Facades\Log;
+use DRP\DeviceImporter\TraitHidePrivates;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use DRP\DeviceImporter\DeviceImporter;
@@ -29,29 +30,39 @@ use DRP\DeviceImporter\DeviceImporter;
  * @since       0.0.1
  */
 class ImportController extends Controller {
+    use TraitHidePrivates;
 
-    const CONTROLLER_PATH = 'plugin/device-importer';
+    private array $info;
+    private string $plugin;
+    private string $controllerPath;
+
+    public function __construct() {
+        $this->info = DeviceImporter::getInfo();
+        $this->plugin = DeviceImporter::PLUGIN;
+        $this->controllerPath = self::CONTROLLER_PATH;
+    }
+
 
     public function index(): View {
 
-        /*
-        $filepath = "../resources/views/layouts/menu.blade.php";
-        $contents = (array) file_get_contents($filepath);
-        Log::alert('CONTESTS', $contents);
-        */
         Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
-        return view('device-importer::page')->with('error', 'Your custom error message goes here.');
+        return view("$this->plugin::page");
     }
 
     public function upload(): View {
         Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
-        $data = DeviceImporter::getInfo();
-        return view('device-importer::upload', ['info' => $data]);
+
+        return view("$this->plugin::upload", ['info' => $this->info]);
+    }
+
+    public function export(): View {
+        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
+        return view("$this->plugin::export", ['info' => $this->info]);
     }
 
     public function settings(): View {
         Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
-        $data = DeviceImporter::getInfo();
-        return view('device-importer::settings', ['info' => $data]);
+
+        return view("$this->plugin::settings", ['info' => $this->info]);
     }
 }

@@ -42,22 +42,22 @@ use DRP\DeviceImporter\Hooks\Settings;
  */
 class DeviceImportProvider extends ServiceProvider {
 
-    public function register(): void {
-    }
+	public function register(): void {
+	}
 
-    public function boot(): void {
-        $pluginName = 'device-importer';
+	public function boot(): void {
+		$pluginName = 'device-importer';
 
-        $hasRedis = checkRedis();
-        if (! $hasRedis) {
-            $obj = new ImportSettings();
-            $obj->set('redis', false);
-        } else {
-            config(['queue.default' => 'redis']);
-        }
+		$hasRedis = checkRedis();
+		if (! $hasRedis) {
+			$obj = new PluginSettings();
+			$obj->set('redis', false);
+		} else {
+			config(['queue.default' => 'redis']);
+		}
 
 
-        /*
+		/*
          * Compatibility view path.
          *
          * LibreNMS local plugins commonly reference views like:
@@ -67,32 +67,32 @@ class DeviceImportProvider extends ServiceProvider {
          * device-importer::page
          */
 
-        $rootPath = base_path();
-        $viewPath = $rootPath . '/vendor/daryl-peterson/librenms-device-importer/resources/views';
-        $paths = [
-            __DIR__ . '/..',
-            __DIR__ . '/../resources/views',
-            $viewPath,
+		$rootPath = base_path();
+		$viewPath = $rootPath . '/vendor/daryl-peterson/librenms-device-importer/resources/views';
+		$paths = [
+			__DIR__ . '/..',
+			__DIR__ . '/../resources/views',
+			$viewPath,
 
-        ];
-        Log::debug('View paths: ' . PHP_EOL . print_r($paths, true));
-
-
-        $this->loadViewsFrom($paths, 'device-importer');
-        //$this->loadViewsFrom(__DIR__ . '/../resources/views', 'librenms-device-importer');
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-
-        $paths = View::getFinder()->getPaths();
-        Log::debug('Current view paths: ' . PHP_EOL . print_r($paths, true));
+		];
+		Log::debug('View paths: ' . PHP_EOL . print_r($paths, true));
 
 
-        $pluginManager = $this->app->make(PluginManagerInterface::class);
+		$this->loadViewsFrom($paths, 'device-importer');
+		//$this->loadViewsFrom(__DIR__ . '/../resources/views', 'librenms-device-importer');
+		$this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+		$this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
-        Log::debug('Plugin Manager: ' . PHP_EOL . print_r($pluginManager, true));
-        $pluginManager->publishHook($pluginName, DeviceOverviewHookInterface::class, DeviceOverview::class);
-        $pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
-        $pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
-        $pluginManager->publishHook($pluginName, SettingsHookInterface::class, Settings::class);
-    }
+		$paths = View::getFinder()->getPaths();
+		Log::debug('Current view paths: ' . PHP_EOL . print_r($paths, true));
+
+
+		$pluginManager = $this->app->make(PluginManagerInterface::class);
+
+		Log::debug('Plugin Manager: ' . PHP_EOL . print_r($pluginManager, true));
+		$pluginManager->publishHook($pluginName, DeviceOverviewHookInterface::class, DeviceOverview::class);
+		$pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
+		$pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
+		$pluginManager->publishHook($pluginName, SettingsHookInterface::class, Settings::class);
+	}
 }

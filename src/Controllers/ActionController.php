@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use DRP\DeviceImporter\DeviceImporter;
 use DRP\DeviceImporter\FileManager;
-use DRP\DeviceImporter\ImportSettings;
+use DRP\DeviceImporter\PluginSettings;
 use DRP\DeviceImporter\Jobs\ImportDeviceJob;
 use DRP\DeviceImporter\SNMPTester;
 use DRP\DeviceImporter\TraitHidePrivates;
@@ -42,11 +42,11 @@ class ActionController extends Controller {
 
     private array $headersRequired = [];
     private array $map = [];
-    private ImportSettings $settings;
+    private PluginSettings $settings;
 
     public function __construct() {
         $this->headersRequired = ['hostname', 'ip_address', 'os'];
-        $this->settings = new ImportSettings();
+        $this->settings = new PluginSettings();
     }
 
     public function handle(Request $request) {
@@ -68,6 +68,22 @@ class ActionController extends Controller {
                 'unknown_action'
             ),
         };
+    }
+
+    public function export(Request $request): Redirector|RedirectResponse {
+        $user = auth()->user();
+
+        if (! $user || ! $user->can('global-read')) {
+            abort(403, 'Forbidden');
+        }
+
+        $url = route('device-importer.export');
+        // Implement export logic here
+        return $this->redirect(
+            $url,
+            'success',
+            'Export completed successfully'
+        );
     }
 
 

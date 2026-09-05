@@ -41,9 +41,21 @@ class DeviceImporter {
     /**
      * Get plugin information.
      *
-     * @return array{name: '',title: '',author: '',ver: '',settings: string,page: string,plugin: Plugin,redis: bool}
+     * @return array{
+     *  name: '',
+     *  title: '',
+     *  author: '',
+     *  ver: '',
+     *  settings: array,
+     *  routes: array{
+     *    settings: string,
+     *    page: string
+     *  },
+     *  plugin: Plugin,
+     *  redis: bool
+     * }
      *
-     * @version 1.0.0
+     * @version 0.0.1
      */
     public static function getInfo() {
 
@@ -67,7 +79,7 @@ class DeviceImporter {
      * Get plugin object model.
      *
      * @return Plugin
-     * @version 1.0.0
+     * @version 0.0.1
      */
     public static function getPlugin(): Plugin|null {
         $result = Plugin::where('plugin_name', self::PLUGIN)->first();
@@ -81,7 +93,7 @@ class DeviceImporter {
     }
 
     public static function getSettings(): array {
-        $obj = new ImportSettings();
+        $obj = new PluginSettings();
         $settings = $obj->all();
         return $settings ?? [];
     }
