@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Page for the Device Importer plugin.
+ * LibreNMS Device Importer Page.
  *
  * @package     App\Plugins\DeviceImporter
  * @author      Daryl Peterson <@gmail.com>
@@ -18,9 +18,9 @@ use DRP\DeviceImporter\DeviceImporter;
 
 
 /**
- * Page for the Device Importer plugin.
+ * LibreNMS Device Importer Page.
  *
- * @package     App\Plugins\DeviceImporter
+ * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
  * @copyright   Copyright (c) 2026, Daryl Peterson
  * @license     https://opensource.org MIT License
@@ -29,10 +29,10 @@ use DRP\DeviceImporter\DeviceImporter;
  */
 class Page extends PageHook {
 
-	public function data(): array {
+    public function data(): array {
 
-		return [
-			'info' => DeviceImporter::getInfo(),
-		];
-	}
+        return [
+            'info' => DeviceImporter::getInfo(),
+        ];
+    }
 }

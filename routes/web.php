@@ -1,31 +1,43 @@
 <?php
 
+/**
+ * Web routes for the Device Importer plugin.
+ *
+ * @package     device-importer
+ * @author      Daryl Peterson <@gmail.com>
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
+ * @since       1.0.0
+ */
+
+
 use Illuminate\Support\Facades\Route;
 
 use DRP\DeviceImporter\Controllers\ImportController;
 use DRP\DeviceImporter\Controllers\ActionController;
-
-
 use function DRP\DeviceImporter\checkRedis;
-/*
+use DRP\DeviceImporter\DeviceImporter;
 
-Route::middleware(['web'])
-    ->get('plugin/device-importer/', [DeviceImportController::class, 'index'])
-    ->name('device-importer.index');
-*/
+$plugin = DeviceImporter::PLUGIN;
 
+
+/**
+ * Upload route
+ */
 if (checkRedis()) {
     Route::middleware(['web'])
-        ->get('plugin/device-importer/upload', [ImportController::class, 'upload'])
-        ->name('device-importer.upload');
+        ->get("plugin/$plugin/upload", [ImportController::class, 'upload'])
+        ->name("$plugin.upload");
 }
 
+/**
+ * Settings route
+ */
+Route::middleware(['web'])
+    ->get("plugin/settings/$plugin", [ImportController::class, 'settings'])
+    ->name("$plugin.settings");
+
 
 Route::middleware(['web'])
-    ->get('plugin/settings/device-importer', [ImportController::class, 'settings'])
-    ->name('device-importer.settings');
-
-
-Route::middleware(['web'])
-    ->post('plugin/device-importer/action', [ActionController::class, 'handle'])
-    ->name('device-importer.action');
+    ->post("plugin/$plugin/action", [ActionController::class, 'handle'])
+    ->name("$plugin.action");

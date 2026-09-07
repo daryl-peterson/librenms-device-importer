@@ -34,12 +34,11 @@ class ImportController extends Controller {
 
     private array $info;
     private string $plugin;
-    private string $controllerPath;
+
 
     public function __construct() {
         $this->info = DeviceImporter::getInfo();
         $this->plugin = DeviceImporter::PLUGIN;
-        $this->controllerPath = self::CONTROLLER_PATH;
     }
 
 

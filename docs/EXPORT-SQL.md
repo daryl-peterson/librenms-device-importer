@@ -11,3 +11,7 @@ FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 FROM devices AS d;
+
+
+
+sed -i 'hostname,hardware,serial,os,snmpver,community,snmp_disable' /tmp/librenms_devices_final.csv
