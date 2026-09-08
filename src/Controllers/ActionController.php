@@ -13,12 +13,14 @@
 
 namespace DRP\DeviceImporter\Controllers;
 
+use Exception;
+
+
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,7 +30,8 @@ use DRP\DeviceImporter\PluginSettings;
 use DRP\DeviceImporter\Jobs\ImportDeviceJob;
 use DRP\DeviceImporter\SNMPTester;
 use DRP\DeviceImporter\TraitHidePrivates;
-
+use DRP\DeviceImporter\TraitValidateAdmin;
+use DRP\DeviceImporter\CsvProcessor;
 
 
 /**
@@ -43,6 +46,7 @@ use DRP\DeviceImporter\TraitHidePrivates;
  */
 class ActionController extends Controller {
     use TraitHidePrivates;
+    use TraitValidateAdmin;
 
     private array $headersRequired = [];
     private array $map = [];
@@ -55,7 +59,14 @@ class ActionController extends Controller {
         $this->csvHeaders = ['hostname', 'hardware', 'serial', 'os', 'snmpver', 'community', 'snmp_disable'];
     }
 
-    public function handle(Request $request) {
+    /**
+     * Handel request.
+     *
+     * @param Request $request
+     * @return StreamedResponse|Redirector|RedirectResponse|null
+     * @since 0.0.1
+     */
+    public function handle(Request $request): StreamedResponse|Redirector|RedirectResponse|null {
         $user = auth()->user();
 
         if (! $user || ! $user->can('global-read')) {
@@ -82,50 +93,17 @@ class ActionController extends Controller {
      *
      * @param Request $request
      * @return StreamedResponse|null
+     * @since 0.0.1
+     * @throws Exception If there is an error during the export process.
      *
      */
     public function export(Request $request): ?StreamedResponse {
-        $user = auth()->user();
-
-        if (! $user || ! $user->can('global-read')) {
-            abort(403, 'Forbidden');
-        }
-
+        $this->validateAdmin();
 
         try {
-            $sql = <<<EOD
-            SELECT
-                d.hostname,
-                d.hardware,
-                d.serial,
-                d.os,
-                d.snmpver,
-                d.community,
-                d.snmp_disable
-            FROM devices d;
-            EOD;
-
-            $results = DB::select($sql);
-
-            $response = new StreamedResponse(function () use ($results) {
-                $handle = fopen('php://output', 'w');
-
-                // Add CSV Headers
-                fputcsv($handle, $this->csvHeaders);
-
-                // Add Data Rows
-                foreach ($results as $row) {
-                    fputcsv($handle, [$row->hostname, $row->hardware, $row->serial, $row->os, $row->snmpver, $row->community, $row->snmp_disable]);
-                }
-
-                fclose($handle);
-            });
-
-            $response->headers->set('Content-Type', 'text/csv');
-            $response->headers->set('Content-Disposition', 'attachment; filename="librenms-export.csv"');
-
-            return $response;
-        } catch (\Exception $e) {
+            $obj = new CsvProcessor();
+            return $obj->export();
+        } catch (Exception $e) {
             Log::error('Export error: ' . $e->getMessage() . PHP_EOL);
             Log::error($e->getTraceAsString());
             return null;
@@ -141,68 +119,77 @@ class ActionController extends Controller {
      * @since 0.0.1
      */
     public function upload(Request $request): Redirector|RedirectResponse {
-        Log::debug('Upload action initiated by user: ' . Auth::id());
+        $this->validateAdmin();
+
+        try {
 
 
-        if (!Auth::check() || Auth::user()->hasRole('admin')) {
-            //return $this->redirect('permission_denied');
-        }
+            $file = $request->file('csv');
 
-        $file = $request->file('csv');
+            Log::debug('CSV file: ', [$file]);
+            $url = route('device-importer.upload');
+            if (empty($file)) {
+                $type = 'error';
+                $message = 'No file uploaded';
+                return $this->redirect(
+                    $url,
+                    $type,
+                    $message
+                );
+            }
 
-        Log::debug('CSV file: ', [$file]);
-        $url = route('device-importer.upload');
-        if (empty($file)) {
-            $type = 'error';
-            $message = 'No file uploaded';
+            // Check if the file is valid
+            if (! $file->isValid()) {
+                $type = 'error';
+                $message = 'Invalid file upload';
+                return $this->redirect(
+                    $url,
+                    $type,
+                    $message
+                );
+            }
+
+            $return = $request->validate([
+                'csv' => 'required|file|mimes:csv,txt',
+            ]);
+            Log::debug('Validation result: ', [$return]);
+
+            $mimeType = $file->getMimeType($file);
+            Log::debug('CSV MIME type: ' . $mimeType);
+            if ($mimeType !== 'text/csv') {
+                $type = 'error';
+                $message = 'Invalid file';
+                return $this->redirect(
+                    $url,
+                    $type,
+                    $message
+                );
+            }
+
+            FileManager::deleteAll();
+            $fileName = FileManager::addFile($file);
+            Log::debug('File added: ' . $fileName);
+
+            ImportDeviceJob::dispatch($fileName);
+            Artisan::call('queue:work', [
+                'connection' => 'plugin_database_queue',
+                '--stop-when-empty' => true,
+                '--tries' => 3,
+            ]);
             return $this->redirect(
                 $url,
-                $type,
-                $message
+                'success',
+                'File uploaded successfully'
             );
-        }
-
-        // Check if the file is valid
-        if (! $file->isValid()) {
-            $type = 'error';
-            $message = 'Invalid file upload';
+        } catch (Exception $e) {
+            Log::error('Upload error: ' . $e->getMessage() . PHP_EOL);
+            Log::error($e->getTraceAsString());
             return $this->redirect(
-                $url,
-                $type,
-                $message
+                route('device-importer.upload'),
+                'error',
+                'An error occurred during file upload'
             );
         }
-
-        $return = $request->validate([
-            'csv' => 'required|file|mimes:csv,txt',
-        ]);
-        Log::debug('Validation result: ', [$return]);
-
-        $mimeType = $file->getMimeType($file);
-        Log::debug('CSV MIME type: ' . $mimeType);
-        if ($mimeType !== 'text/csv') {
-            $type = 'error';
-            $message = 'Invalid file';
-            return $this->redirect(
-                $url,
-                $type,
-                $message
-            );
-        }
-
-        FileManager::deleteAll();
-        $fileName = FileManager::addFile($file);
-
-        ImportDeviceJob::dispatch($fileName);
-        Artisan::call('queue:work', [
-            '--stop-when-empty' => true,
-            '--tries' => 3,
-        ]);
-        return $this->redirect(
-            $url,
-            'success',
-            'File uploaded successfully'
-        );
     }
 
     /**
@@ -230,8 +217,6 @@ class ActionController extends Controller {
             $message
         );
     }
-
-
 
     private function processUpload(array $data) {
 

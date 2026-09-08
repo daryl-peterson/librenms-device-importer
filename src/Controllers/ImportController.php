@@ -13,11 +13,14 @@
 
 namespace DRP\DeviceImporter\Controllers;
 
-use Illuminate\Support\Facades\Log;
-use DRP\DeviceImporter\TraitHidePrivates;
+
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+
+use DRP\DeviceImporter\TraitHidePrivates;
 use DRP\DeviceImporter\DeviceImporter;
+use DRP\DeviceImporter\TraitValidateAdmin;
 
 /**
  * Device Import Controller
@@ -31,11 +34,16 @@ use DRP\DeviceImporter\DeviceImporter;
  */
 class ImportController extends Controller {
     use TraitHidePrivates;
+    use TraitValidateAdmin;
 
     private array $info;
     private string $plugin;
 
-
+    /**
+     * Constructor.
+     *
+     * @since 0.0.1
+     */
     public function __construct() {
         $this->info = DeviceImporter::getInfo();
         $this->plugin = DeviceImporter::PLUGIN;
@@ -48,19 +56,38 @@ class ImportController extends Controller {
         return view("$this->plugin::page");
     }
 
+    /**
+     * Upload page.
+     *
+     * @return View
+     * @since 0.0.1
+     */
     public function upload(): View {
-        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
+        $this->validateAdmin();
 
         return view("$this->plugin::upload", ['info' => $this->info]);
     }
 
+    /**
+     * Export page.
+     *
+     * @return View
+     * @since 0.0.1
+     */
     public function export(): View {
-        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
+        $this->validateAdmin();
+
         return view("$this->plugin::export", ['info' => $this->info]);
     }
 
+    /**
+     * Settings page.
+     *
+     * @return View
+     * @since 0.0.1
+     */
     public function settings(): View {
-        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
+        $this->validateAdmin();
 
         return view("$this->plugin::settings", ['info' => $this->info]);
     }

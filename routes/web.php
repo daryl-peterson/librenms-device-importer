@@ -43,7 +43,9 @@ Route::middleware(['web'])
     ->get("plugin/settings/$plugin", [ImportController::class, 'settings'])
     ->name("$plugin.settings");
 
-
+/**
+ * Action route
+ */
 Route::middleware(['web'])
     ->post("plugin/$plugin/action", [ActionController::class, 'handle'])
     ->name("$plugin.action");
