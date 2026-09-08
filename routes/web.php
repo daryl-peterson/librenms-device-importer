@@ -30,6 +30,12 @@ if (checkRedis()) {
         ->name("$plugin.upload");
 }
 
+
+Route::middleware(['web'])
+    ->get("plugin/$plugin/export", [ImportController::class, 'export'])
+    ->name("$plugin.export");
+
+
 /**
  * Settings route
  */

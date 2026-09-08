@@ -32,6 +32,15 @@
                 <a href="{{ route('device-importer.settings') }}" class="sync-filter-url">Settings</a>
                 </span>
                 @if ($info['redis'])
+                    |@if ($currentRouteName === 'device-importer.export')
+                        <span class="pagemenu-selected">
+                    @endif
+
+                    <a href="{{ route('device-importer.export') }}" class="sync-filter-url">Export</a>
+                    @if ($currentRouteName !== 'device-importer.export')
+                        <span>
+                    @endif
+                    </span>
                     |
 
                     @if ($currentRouteName === 'device-importer.upload')

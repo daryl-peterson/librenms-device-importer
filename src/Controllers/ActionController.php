@@ -18,14 +18,18 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use DRP\DeviceImporter\DeviceImporter;
 use DRP\DeviceImporter\FileManager;
 use DRP\DeviceImporter\PluginSettings;
 use DRP\DeviceImporter\Jobs\ImportDeviceJob;
 use DRP\DeviceImporter\SNMPTester;
 use DRP\DeviceImporter\TraitHidePrivates;
+
+
 
 /**
  * Action Controller
@@ -61,7 +65,8 @@ class ActionController extends Controller {
 
 
         return match ($action) {
-            'upload' => $this->upload($request,),
+            'export' => $this->export($request),
+            'upload' => $this->upload($request),
             'save' => $this->save($request),
             default => $this->redirect(
                 null,
@@ -70,20 +75,51 @@ class ActionController extends Controller {
         };
     }
 
-    public function export(Request $request): Redirector|RedirectResponse {
+    /**
+     * Export devices as a CSV file.
+     *
+     * @param Request $request
+     * @return StreamedResponse
+     */
+    public function export(Request $request): StreamedResponse {
         $user = auth()->user();
 
         if (! $user || ! $user->can('global-read')) {
             abort(403, 'Forbidden');
         }
 
-        $url = route('device-importer.export');
-        // Implement export logic here
-        return $this->redirect(
-            $url,
-            'success',
-            'Export completed successfully'
-        );
+        $sql = <<<EOD
+        SELECT
+            d.hostname,
+            d.hardware,
+            d.serial,
+            d.os,
+            d.snmpver,
+            d.community,
+            d.snmp_disable
+        FROM devices d;
+        EOD;
+
+        $results = DB::select($sql);
+
+        $response = new StreamedResponse(function () use ($results) {
+            $handle = fopen('php://output', 'w');
+
+            // Add CSV Headers
+            fputcsv($handle, ['Hostname', 'Hardware', 'Serial', 'OS', 'SNMP Version', 'Community', 'SNMP Disable']);
+
+            // Add Data Rows
+            foreach ($results as $row) {
+                fputcsv($handle, [$row->hostname, $row->hardware, $row->serial, $row->os, $row->snmpver, $row->community, $row->snmp_disable]);
+            }
+
+            fclose($handle);
+        });
+
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="librenms-export.csv"');
+
+        return $response;
     }
 
 

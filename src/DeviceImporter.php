@@ -49,7 +49,9 @@ class DeviceImporter {
      *  settings: array,
      *  routes: array{
      *    settings: string,
-     *    page: string
+     *    page: string,
+     *    export: string,
+     *    upload: string
      *  },
      *  plugin: Plugin,
      *  redis: bool
@@ -58,7 +60,7 @@ class DeviceImporter {
      * @version 0.0.1
      */
     public static function getInfo() {
-
+        $plugin = self::PLUGIN;
         $redisAvailable = checkRedis();
         return array(
             'name'     => self::PLUGIN,
@@ -67,8 +69,10 @@ class DeviceImporter {
             'ver'      => self::VER,
             'settings' => self::getSettings(),
             'routes'   => [
-                'settings' => route('plugin.settings', self::PLUGIN),
-                'page'     => route('plugin.page', self::PLUGIN),
+                'settings' => route('plugin.settings', $plugin),
+                'page'     => route('plugin.page', $plugin),
+                'export'   => route("$plugin.export", $plugin),
+                'upload'   => route("$plugin.upload", $plugin),
             ],
             'plugin'   => self::getPlugin(),
             'redis' => $redisAvailable,
