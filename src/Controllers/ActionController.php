@@ -47,10 +47,12 @@ class ActionController extends Controller {
     private array $headersRequired = [];
     private array $map = [];
     private PluginSettings $settings;
+    private array $csvHeaders;
 
     public function __construct() {
         $this->headersRequired = ['hostname', 'ip_address', 'os'];
         $this->settings = new PluginSettings();
+        $this->csvHeaders = ['hostname', 'hardware', 'serial', 'os', 'snmpver', 'community', 'snmp_disable'];
     }
 
     public function handle(Request $request) {
@@ -79,47 +81,55 @@ class ActionController extends Controller {
      * Export devices as a CSV file.
      *
      * @param Request $request
-     * @return StreamedResponse
+     * @return StreamedResponse|null
+     *
      */
-    public function export(Request $request): StreamedResponse {
+    public function export(Request $request): ?StreamedResponse {
         $user = auth()->user();
 
         if (! $user || ! $user->can('global-read')) {
             abort(403, 'Forbidden');
         }
 
-        $sql = <<<EOD
-        SELECT
-            d.hostname,
-            d.hardware,
-            d.serial,
-            d.os,
-            d.snmpver,
-            d.community,
-            d.snmp_disable
-        FROM devices d;
-        EOD;
 
-        $results = DB::select($sql);
+        try {
+            $sql = <<<EOD
+            SELECT
+                d.hostname,
+                d.hardware,
+                d.serial,
+                d.os,
+                d.snmpver,
+                d.community,
+                d.snmp_disable
+            FROM devices d;
+            EOD;
 
-        $response = new StreamedResponse(function () use ($results) {
-            $handle = fopen('php://output', 'w');
+            $results = DB::select($sql);
 
-            // Add CSV Headers
-            fputcsv($handle, ['Hostname', 'Hardware', 'Serial', 'OS', 'SNMP Version', 'Community', 'SNMP Disable']);
+            $response = new StreamedResponse(function () use ($results) {
+                $handle = fopen('php://output', 'w');
 
-            // Add Data Rows
-            foreach ($results as $row) {
-                fputcsv($handle, [$row->hostname, $row->hardware, $row->serial, $row->os, $row->snmpver, $row->community, $row->snmp_disable]);
-            }
+                // Add CSV Headers
+                fputcsv($handle, $this->csvHeaders);
 
-            fclose($handle);
-        });
+                // Add Data Rows
+                foreach ($results as $row) {
+                    fputcsv($handle, [$row->hostname, $row->hardware, $row->serial, $row->os, $row->snmpver, $row->community, $row->snmp_disable]);
+                }
 
-        $response->headers->set('Content-Type', 'text/csv');
-        $response->headers->set('Content-Disposition', 'attachment; filename="librenms-export.csv"');
+                fclose($handle);
+            });
 
-        return $response;
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="librenms-export.csv"');
+
+            return $response;
+        } catch (\Exception $e) {
+            Log::error('Export error: ' . $e->getMessage() . PHP_EOL);
+            Log::error($e->getTraceAsString());
+            return null;
+        }
     }
 
 
