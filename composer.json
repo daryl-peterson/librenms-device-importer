@@ -30,10 +30,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "DRP\\DeviceImporter\\DeviceImportProvider"
+                "DRP\\DeviceImporter\\PluginProvider"
             ],
             "aliases": {
-                "DeviceImporter": "DRP\\DeviceImporter\\Facade"
+                "PluginProvider": "DRP\\DeviceImporter\\Facade"
             }
         }
     }

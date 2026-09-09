@@ -59,6 +59,7 @@ class Settings extends SettingsHook {
      */
     public function data(array $settings = []): array {
         return [
+            'info' => DeviceImporter::getInfo(),
             'settings' => $settings,
         ];
     }

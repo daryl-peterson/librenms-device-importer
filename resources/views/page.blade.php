@@ -11,6 +11,8 @@
             <div class="panel-body">
                 @includeIf('device-importer::partials.author')
 
+                @includeIf('device-importer::partials.dbstatus')
+
             </div>
         </div>
     </div>

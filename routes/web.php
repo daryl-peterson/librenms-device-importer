@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 use DRP\DeviceImporter\Controllers\ImportController;
 use DRP\DeviceImporter\Controllers\ActionController;
-use function DRP\DeviceImporter\checkRedis;
+use DRP\DeviceImporter\DbCheck;
+
 use DRP\DeviceImporter\DeviceImporter;
 
 $plugin = DeviceImporter::PLUGIN;
@@ -24,7 +25,7 @@ $plugin = DeviceImporter::PLUGIN;
 /**
  * Upload route
  */
-if (checkRedis()) {
+if (DbCheck::isReady()) {
     Route::middleware(['web'])
         ->get("plugin/$plugin/upload", [ImportController::class, 'upload'])
         ->name("$plugin.upload");

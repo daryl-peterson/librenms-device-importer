@@ -35,6 +35,9 @@ class ImportDeviceJob implements ShouldQueue {
 
     protected array $data;
 
+    /**
+     * The name of the CSV file to import.
+     */
     protected string $fileName;
 
     /**
@@ -47,21 +50,13 @@ class ImportDeviceJob implements ShouldQueue {
      */
     public $failedConnection = 'plugin_db';
 
-
+    /**
+     * Object constructor.
+     *
+     * @param string $fileName The name of the CSV file to import.
+     */
     public function __construct(string $fileName) {
         $this->fileName = $fileName;
-
-        /*
-        config(['queue.default' => 'redis']);
-        config(
-            [
-                'failed' => [
-                    'driver' => 'redis',
-                    'table' => 'failed_jobs'
-                ]
-            ]
-        );
-        */
     }
 
     public function handle() {

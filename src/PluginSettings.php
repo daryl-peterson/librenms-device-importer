@@ -81,8 +81,8 @@ class PluginSettings {
     /**
      * Get a specific plugin setting.
      *
-     * @param string $key
-     * @param mixed $default
+     * @param string $key The setting key to retrieve.
+     * @param mixed $default The default value to return if the setting key does not exist.
      * @return mixed
      *
      * @since 0.0.1
@@ -94,8 +94,8 @@ class PluginSettings {
     /**
      * Set a plugin setting.
      *
-     * @param string $key
-     * @param mixed $value
+     * @param string $key The setting key to set.
+     * @param mixed $value The value to set for the specified setting key.
      * @return bool
      *
      * @since 0.0.1
@@ -116,6 +116,25 @@ class PluginSettings {
         }
     }
 
+    /**
+     * Check if a plugin setting exists.
+     *
+     * @param string $key The setting key to check for existence.
+     * @return bool
+     *
+     * @since 0.0.1
+     */
+    public function has(string $key): bool {
+        return isset($this->settings[$key]);
+    }
+
+    /**
+     * Reset all plugin settings.
+     *
+     * @return void
+     *
+     * @since 0.0.1
+     */
     public function reset() {
         $this->settings = [];
         if (!is_null($this->plugin)) {
@@ -124,6 +143,14 @@ class PluginSettings {
         }
     }
 
+    /**
+     * Delete a specific plugin setting.
+     *
+     * @param string $key The setting key to delete.
+     * @return bool
+     *
+     * @since 0.0.1
+     */
     public function delete(string $key): bool {
         try {
             if (isset($this->settings[$key])) {

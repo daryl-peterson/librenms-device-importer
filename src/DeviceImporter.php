@@ -16,6 +16,8 @@ namespace DRP\DeviceImporter;
 use App\Models\Plugin;
 use Illuminate\Support\Facades\Log;
 
+use DRP\DeviceImporter\PluginSettings;
+
 /**
  * Device Importer Plugin.
  *
@@ -32,8 +34,6 @@ class DeviceImporter {
     const TITLE         = 'Device Importer';
     const AUTHOR        = 'Daryl Peterson';
     const VER           = '0.0.1';
-    const DB_NAME       = 'librenms_plugin_db';
-    const DB_CONN = 'plugin_db';
 
     /**
      * Constructor.
@@ -53,35 +53,38 @@ class DeviceImporter {
      *  title: '',
      *  author: '',
      *  ver: '',
+     *  image: '',
      *  settings: array,
-     *  routes: array{
-     *    settings: string,
-     *    page: string,
-     *    export: string,
-     *    upload: string
+     *  dbStatus: array{
+     *    ready: bool,
+     *    error: string|null
      *  },
-     *  redis: bool
      * }
      *
      * @version 0.0.1
      */
     public static function getInfo() {
         $plugin = self::PLUGIN;
-        $redisAvailable = checkRedis();
+
         $result = array(
             'name'     => self::PLUGIN,
             'title'    => self::TITLE,
             'author'   => self::AUTHOR,
             'ver'      => self::VER,
+            'image'    => 'https://avatars.githubusercontent.com/u/13834451?s=400&u=ff8417db6126da8d9ff82822ea0be5897ad744b3&v=4',
             'settings' => self::getSettings(),
+            'dbStatus'  => [
+                'ready' => DbCheck::isReady(),
+                'error' => DbCheck::getError()
+            ],
+            /*
             'routes'   => [
                 'settings' => route('plugin.settings', $plugin),
                 'page'     => route('plugin.page', $plugin),
                 'export'   => route("$plugin.export", $plugin),
                 'upload'   => route("$plugin.upload", $plugin),
             ],
-            //'plugin'   => self::getPlugin(),
-            'redis' => $redisAvailable,
+            */
         );
         Log::debug('Plugin info: ' . PHP_EOL . print_r($result, true));
         return $result;

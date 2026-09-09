@@ -28,7 +28,6 @@ use DRP\DeviceImporter\DeviceImporter;
 use DRP\DeviceImporter\FileManager;
 use DRP\DeviceImporter\PluginSettings;
 use DRP\DeviceImporter\Jobs\ImportDeviceJob;
-use DRP\DeviceImporter\SNMPTester;
 use DRP\DeviceImporter\TraitHidePrivates;
 use DRP\DeviceImporter\TraitValidateAdmin;
 use DRP\DeviceImporter\CsvProcessor;
@@ -218,78 +217,7 @@ class ActionController extends Controller {
         );
     }
 
-    private function processUpload(array $data) {
 
-        $header = explode(',', array_shift($data));
-        $this->parseCsvHeader($header);
-
-        Log::debug('CSV Header Map: ' . print_r($map, true));
-        Log::debug('CSV Header: ' . print_r($header, true));
-        Log::debug('CSV Data: ' . print_r($data, true));
-
-
-        foreach ($data as $key => $value) {
-            $mappedData = $this->parseCsvLine($value);
-            /*
-            $line = explode(',', $value);
-
-            foreach ($this->map as $column => $index) {
-                $mappedData[$index] = trim($line[$index]);
-            }
-            */
-            Log::debug('Mapped Data: ' . print_r($mappedData, true));
-        }
-
-        /*
-        [hostname] => wainwright-sw10g-01.oklatel.net
-        [ip_address] => 10.30.32.5
-        [os] => Cisco IOS
-        */
-
-
-
-        $obj = new SNMPTester();
-        $result = $obj->test('10.13.10.4', 'moly560311', '2c');
-        Log::debug('SNMP Test Result: ' . print_r($result, true));
-        //SNMPTester::test($mappedData['hostname'], 'public', 2);
-    }
-
-    private function parseCsvLine(string $line) {
-
-        $line = explode(',', $line);
-        $mappedData = [];
-        foreach ($this->map as $column => $index) {
-
-            $clean = preg_replace('/^["\'](.*)["\']$/', '$1', $line[$index]);
-            $mappedData[$column] = trim($clean);
-        }
-        return $mappedData;
-    }
-
-    private function parseCsvHeader(array $header) {
-
-        foreach ($header as $key => $column) {
-            Log::debug('CSV Column: ' . $column);
-            $column = trim($column);
-            $column = strtolower($column);
-            $column = str_replace(' ', '_', $column);
-            $column = preg_replace('/^["\'](.*)["\']$/', '$1', $column);
-            $header[$key] = $column;
-        }
-
-        Log::debug('Header: ' . print_r($header, true));
-
-        $map = [];
-
-        foreach ($header as $key => $column) {
-            Log::debug('Mapping column: ' . $column);
-            if (in_array($column, $this->headersRequired)) {
-                $map[$column] = $key;
-            }
-        }
-
-        $this->map = $map;
-    }
 
 
     /**

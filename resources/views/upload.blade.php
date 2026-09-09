@@ -1,3 +1,7 @@
+@php
+    Log::debug('INFO ' . PHP_EOL . print_r($info, true));
+@endphp
+
 @extends('layouts.librenmsv1')
 
 @section('content')

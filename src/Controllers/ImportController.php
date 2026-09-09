@@ -15,7 +15,6 @@ namespace DRP\DeviceImporter\Controllers;
 
 
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 use DRP\DeviceImporter\TraitHidePrivates;
@@ -52,7 +51,6 @@ class ImportController extends Controller {
 
     public function index(): View {
 
-        Log::debug(__CLASS__ . '::' . __FUNCTION__ . ' called');
         return view("$this->plugin::page");
     }
 
