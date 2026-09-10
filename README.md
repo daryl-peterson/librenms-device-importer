@@ -32,5 +32,36 @@ crontab -e
 */5  *    * * *   flock -n /tmp/plugin_queue.lock -c "/usr/bin/php /opt/librenms/artisan plugin:process-plugin-queue --tries=3" > /dev/null 2>&1
 ```
 
-![](screenshots/screenshot-02.png)
 
+
+## Manual Export via MySQL
+```bash
+SELECT 
+  'hostname', 
+  'hardware', 
+  'serial', 
+  'os', 
+  'snmpver', 
+  'community', 
+  'snmp_disable'
+UNION ALL
+SELECT 
+  d.hostname, 
+  d.hardware, 
+  d.serial, 
+  d.os, 
+  d.snmpver, 
+  d.community, 
+  d.snmp_disable 
+FROM devices d 
+INTO OUTFILE '/tmp/librenms-ott-devices.csv'
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n';
+
+```
+
+
+## Screen Shots
+
+![](screenshots/screenshot-02.png)
