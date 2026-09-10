@@ -24,7 +24,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Routing\Redirector;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -218,9 +217,6 @@ class ActionController extends Controller {
             $message
         );
     }
-
-
-
 
     /**
      * Do redirect to the plugin page with an optional status.

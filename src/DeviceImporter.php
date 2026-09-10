@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Device Importer Plugin.
+ * LibreNMS Device Importer Plugin.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -13,14 +13,23 @@
 
 namespace DRP\DeviceImporter;
 
+/**
+ * Laravel and application imports.
+ */
+
 use App\Models\Plugin;
 use Illuminate\Support\Facades\Log;
 
-use DRP\DeviceImporter\PluginSettings;
+/**
+ * Plugin imports.
+ */
+
 use DRP\DeviceImporter\DbCheck;
+use DRP\DeviceImporter\PluginSettings;
+
 
 /**
- * Device Importer Plugin.
+ * LibreNMS Device Importer Plugin.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -78,16 +87,8 @@ class DeviceImporter {
                 'ready' => DbCheck::isReady(),
                 'error' => DbCheck::getError()
             ],
-            /*
-            'routes'   => [
-                'settings' => route('plugin.settings', $plugin),
-                'page'     => route('plugin.page', $plugin),
-                'export'   => route("$plugin.export", $plugin),
-                'upload'   => route("$plugin.upload", $plugin),
-            ],
-            */
         );
-        Log::debug('Plugin info: ' . PHP_EOL . print_r($result, true));
+
         return $result;
     }
 

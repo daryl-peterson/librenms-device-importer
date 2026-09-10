@@ -1,7 +1,7 @@
 <?php
 
 /**
- * File manager class for adding, renaming, and deleting files in the uploads directory.
+ * LibreNMS Device Importer File Manager.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -12,14 +12,23 @@
 
 namespace DRP\DeviceImporter;
 
+/**
+ * Standard PHP imports.
+ */
+
 use DateTime;
 use Throwable;
+
+/**
+ * Laravel and application imports.
+ */
+
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 
 
 /**
- * File manager class for handling file operations in the uploads directory.
+ * LibreNMS Device Importer File Manager.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>

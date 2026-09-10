@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Cache for the plugin.
+ * LibreNMS Device Importer Plugin Cache.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -12,12 +12,22 @@
 
 namespace DRP\DeviceImporter;
 
-use Illuminate\Cache\TaggableStore;
-use Illuminate\Support\Facades\Cache;
+/**
+ * Standard PHP imports.
+ */
+
 use UnitEnum;
 
 /**
- * Cache for the plugin.
+ * Laravel and application imports.
+ */
+
+use Illuminate\Cache\TaggableStore;
+use Illuminate\Support\Facades\Cache;
+
+
+/**
+ * LibreNMS Device Importer Plugin Cache.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>

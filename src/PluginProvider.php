@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Device import service provider.
+ * LibreNMS Device Importer Plugin Service Provider.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -13,8 +13,15 @@
 
 namespace DRP\DeviceImporter;
 
+/**
+ * Standard PHP imports.
+ */
+
 use Throwable;
 
+/**
+ * Laravel and application imports.
+ */
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
@@ -25,16 +32,18 @@ use LibreNMS\Interfaces\Plugins\Hooks\SinglePageHook;
 use LibreNMS\Interfaces\Plugins\PluginManagerInterface;
 use LibreNMS\Plugins;
 
-// Plugin libs
+/**
+ * Plugin imports.
+ */
+
 use DRP\DeviceImporter\Console\ProcessPluginQueue;
 use DRP\DeviceImporter\DbCheck;
-use DRP\DeviceImporter\Hooks\DeviceOverview;
 use DRP\DeviceImporter\Hooks\Menu;
 use DRP\DeviceImporter\Hooks\Page;
 use DRP\DeviceImporter\Hooks\Settings;
 
 /**
- * Device import service provider.
+ * LibreNMS Device Importer Plugin Service Provider.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -65,12 +74,9 @@ class PluginProvider extends ServiceProvider {
         $paths = [
             __DIR__ . '/..',
             __DIR__ . '/../resources/views',
-            //$viewPath,
-
         ];
         $this->loadViewsFrom($paths, 'device-importer');
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-        //$this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         $pluginManager = $this->app->make(PluginManagerInterface::class);
         $pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
@@ -83,7 +89,6 @@ class PluginProvider extends ServiceProvider {
             ]);
         }
 
-
         $this->clearCacheOnFirstRun();
     }
 
@@ -92,6 +97,8 @@ class PluginProvider extends ServiceProvider {
      *
      * This method checks for a hidden lock file to determine if it's the first run.
      * If it is, it clears the route, view, and cache, then creates the lock file.
+     *
+     * @since 0.0.0.1
      */
     protected function clearCacheOnFirstRun() {
         // Path to a hidden lock file inside your plugin folder

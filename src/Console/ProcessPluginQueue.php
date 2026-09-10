@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Process the plugin queue using the separate database connection.
+ * LibreNMS Device Importer Plugin Process Plugin Queue Command.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Artisan;
 use DRP\DeviceImporter\DbCheck;
 
 /**
- * Process the plugin queue using the separate database connection.
+ * LibreNMS Device Importer Plugin Process Plugin Queue Command.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>

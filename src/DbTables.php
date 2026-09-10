@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Tables required by the plugin.
+ * LibreNMS Device Importer Database Tables.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -12,13 +12,21 @@
 
 namespace DRP\DeviceImporter;
 
+/**
+ * Laravel imports.
+ */
+
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+
+/**
+ * Plugin imports.
+ */
 
 use DRP\DeviceImporter\DbCheck;
 
 /**
- * Tables required by the plugin.
+ * LibreNMS Device Importer Database Tables.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -26,12 +34,19 @@ use DRP\DeviceImporter\DbCheck;
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
  * @since       0.0.1
+ *
+ * @todo Add table for import status etc.
  */
 class DbTables {
     public function __construct() {
         # Code Here
     }
 
+    /**
+     * Create the necessary database tables for the plugin.
+     *
+     * @since 0.0.1
+     */
     public static function createTables() {
         $connection = DbCheck::getDbConnection();
         if (!Schema::connection($connection)->hasTable('jobs')) {

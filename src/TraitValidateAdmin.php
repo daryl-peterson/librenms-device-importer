@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * LibreNMS Device Importer Trait to validate admin users.
+ *
+ * @package     device-importer
+ * @author      Daryl Peterson <@gmail.com>
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
+ * @since       0.0.1
+ */
+
 namespace DRP\DeviceImporter;
 
 use Illuminate\Support\Facades\Auth;

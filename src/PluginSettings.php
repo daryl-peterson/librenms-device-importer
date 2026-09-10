@@ -13,6 +13,10 @@
 
 namespace DRP\DeviceImporter;
 
+/**
+ * Standard PHP imports.
+ */
+
 use Throwable;
 
 /**
@@ -20,7 +24,7 @@ use Throwable;
  */
 
 use App\Models\Plugin;
-use Illuminate\Support\Facades\Log;
+
 
 /**
  * LibreNMS Device Importer Plugin Settings.

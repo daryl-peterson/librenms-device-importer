@@ -12,16 +12,29 @@
 
 namespace DRP\DeviceImporter\Jobs;
 
-use DRP\DeviceImporter\CsvProcessor;
-use DRP\DeviceImporter\DbCheck;
-use DRP\DeviceImporter\FileManager;
-use Exception;
+/**
+ * Standard PHP imports.
+ */
+
 use Throwable;
+
+/**
+ * Laravel and application imports.
+ */
+
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+
+/**
+ * Plugin imports.
+ */
+
+use DRP\DeviceImporter\CsvProcessor;
+use DRP\DeviceImporter\DbCheck;
+use DRP\DeviceImporter\FileManager;
 
 
 /**
@@ -65,6 +78,11 @@ class ImportDeviceJob implements ShouldQueue {
         DbCheck::setDefaults();
     }
 
+    /**
+     * Handle the job.
+     *
+     * @return void
+     */
     public function handle() {
 
         try {
@@ -82,6 +100,13 @@ class ImportDeviceJob implements ShouldQueue {
         $this->cleanup();
     }
 
+    /**
+     * Cleanup after the job is processed.
+     *
+     * Deletes the CSV file used for import.
+     *
+     * @return void
+     */
     private function cleanup() {
         try {
             FileManager::deleteFile($this->fileName);

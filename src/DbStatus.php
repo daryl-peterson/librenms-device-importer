@@ -12,6 +12,10 @@
 
 namespace DRP\DeviceImporter;
 
+/**
+ * Plugin imports.
+ */
+
 use DRP\DeviceImporter\DbCheck;
 use DRP\DeviceImporter\PluginCache;
 

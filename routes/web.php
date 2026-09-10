@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Web routes for the Device Importer plugin.
+ * LibreNMS Device Importer Web Routes.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>

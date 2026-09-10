@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Trait to hide private properties from debug output.
+ * LibreNMS Device Importer Trait to hide private properties from debug output.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -15,13 +15,13 @@ namespace DRP\DeviceImporter;
 use ReflectionProperty;
 
 trait TraitHidePrivates {
-	public function __debugInfo() {
-		$properties = get_object_vars($this);
-		foreach ($properties as $key => $value) {
-			if ((new ReflectionProperty($this, $key))->isPrivate()) {
-				unset($properties[$key]);
-			}
-		}
-		return $properties;
-	}
+    public function __debugInfo() {
+        $properties = get_object_vars($this);
+        foreach ($properties as $key => $value) {
+            if ((new ReflectionProperty($this, $key))->isPrivate()) {
+                unset($properties[$key]);
+            }
+        }
+        return $properties;
+    }
 }

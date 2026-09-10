@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class description
+ * CSV Processor for the LibreNMS Device Importer plugin.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -12,20 +12,31 @@
 
 namespace DRP\DeviceImporter;
 
+/**
+ * Standard PHP imports.
+ */
 
 use Exception;
 use Throwable;
+
+/**
+ * Laravel and application imports.
+ */
+
 use App\Actions\Device\ValidateDeviceAndCreate;
 use App\Models\Device;
-use DRP\DeviceImporter\TraitHidePrivates;
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Plugin imports.
+ */
+
+use DRP\DeviceImporter\TraitHidePrivates;
 
 /**
- * Class description
+ * LibreNMS Device Importer CSV Processor class.
  *
  * @package     device-importer`
  * @author      Daryl Peterson <@gmail.com>

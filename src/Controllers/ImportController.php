@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Device Import Controller
+ * LibreNMS Device Importer Import Controller
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -13,16 +13,23 @@
 
 namespace DRP\DeviceImporter\Controllers;
 
+/**
+ * Laravel imports.
+ */
 
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
+
+/**
+ * Plugin imports.
+ */
 
 use DRP\DeviceImporter\TraitHidePrivates;
 use DRP\DeviceImporter\DeviceImporter;
 use DRP\DeviceImporter\TraitValidateAdmin;
 
 /**
- * Device Import Controller
+ * LibreNMS Device Importer Import Controller
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
