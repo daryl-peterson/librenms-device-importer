@@ -66,6 +66,8 @@ class CsvProcessor {
             $fields = implode(',', $prefixedHeaders);
             $sql = "SELECT $fields FROM devices d";
 
+            Log::error('Executing SQL: ' . $sql);
+
             $results = DB::select($sql);
 
             $response = new StreamedResponse(function () use ($results) {
