@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "^8.4",
+        "php": "^8.2",
         "librenms/plugin-interfaces": "^1.0"
     },
     "autoload": {
@@ -36,5 +36,7 @@
                 "PluginProvider": "DRP\\DeviceImporter\\Facade"
             }
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
