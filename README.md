@@ -29,7 +29,7 @@ lnms plugin:add daryl-peterson/librenms-device-importer @dev
 ```bash
 crontab -e
 
-*/5  *    * * *   flock -n /tmp/plugin_queue.lock -c "/usr/bin/php /opt/librenms/artisan queue:work plugin_database_queue --stop-when-empty --tries=3" > /dev/null 2>&1
+*/5  *    * * *   flock -n /tmp/plugin_queue.lock -c "/usr/bin/php /opt/librenms/artisan plugin:process-plugin-queue --tries=3" > /dev/null 2>&1
 ```
 
 ![](screenshots/screenshot-02.png)
