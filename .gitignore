@@ -1,7 +1,6 @@
 /vendor/
-/.idea/
+.installed
+.trash
+.vsode
 .phpunit.result.cache
 .DS_Store
-.installed
-_trash/
-/_trash/
