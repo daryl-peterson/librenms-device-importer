@@ -12,8 +12,7 @@
 
 namespace DRP\DeviceImporter;
 
-use Illuminate\Support\Facades\Log;
-
+use Throwable;
 
 /**
  * Class description
@@ -48,8 +47,8 @@ class GitHubInfo {
                 $data = json_decode($response, true);
                 return $data['tag_name'] ?? null;
             }
-        } catch (\Throwable $th) {
-            Log::error('Failed to fetch latest release info from GitHub: ' . $th->getMessage());
+        } catch (Throwable $th) {
+            doErrorMsg($th);
         }
 
 

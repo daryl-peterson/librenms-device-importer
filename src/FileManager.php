@@ -13,6 +13,7 @@
 namespace DRP\DeviceImporter;
 
 use DateTime;
+use Throwable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 
@@ -45,9 +46,8 @@ class FileManager {
             } elseif (is_array($file)) {
                 // Handle multiple file uploads
             }
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
-            Log::error($th->getTraceAsString() . PHP_EOL);
+        } catch (Throwable $th) {
+            doErrorMsg($th);
             return null;
         }
 
@@ -58,30 +58,35 @@ class FileManager {
     /**
      * Delete a file from the uploads directory.
      *
-     * @param string $fileName
-     * @return boolean
+     * @param string $fileName The name of the file to delete.
+     * @return boolean True if the file was successfully deleted, false otherwise.
      * @since 0.0.1
      */
     public static function deleteFile(string $fileName): bool {
         try {
             $fileName = basename($fileName);
-            $path = storage_path('uploads/' . $fileName);
+
+            $path = self::getStorageDir() . $fileName;
             if (file_exists($path)) {
                 return unlink($path);
             }
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
-            Log::error($th->getTraceAsString());
+        } catch (Throwable $th) {
+            doErrorMsg($th);
             return false;
         }
 
         return false;
     }
 
+    /**
+     * Delete all files matching the pattern "*device-import-src.csv" in the uploads directory.
+     *
+     * @since 0.0.1
+     */
     public static function deleteAll() {
 
         try {
-            $directory = "../storage/app/uploads/";
+            $directory = self::getStorageDir();
             $files = glob($directory . "*device-import-src.csv");
             Log::debug('Files to delete: ' . PHP_EOL . print_r($files, true));
 
@@ -89,17 +94,28 @@ class FileManager {
                 unlink($file);
             }
             Log::debug('All files deleted successfully.');
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
-            Log::error($th->getTraceAsString());
+        } catch (Throwable $th) {
+            doErrorMsg($th);
         }
+    }
+
+    /**
+     * Get the storage directory for uploaded files.
+     *
+     * @return string The storage path
+     * @since 0.0.1
+     */
+    public static function getStorageDir(): string {
+        return storage_path('app/uploads/');
     }
 
     /**
      * Store a file in the uploads directory.
      *
-     * @param UploadedFile $file
-     * @return string|null
+     * @param UploadedFile $file The file to store in the uploads directory.
+     * @return string|null The name of the stored file, or null if the storage failed.
+     *
+     * @throws \Exception If the file could not be stored.
      *
      * @since 0.0.1
      */

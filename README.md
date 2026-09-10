@@ -22,9 +22,7 @@ PLUGIN_DB_PASSWORD=[LIBRE_PASSWORD]
 
 ## Install using lnms command
 
-lnms plugin:add daryl-peterson/librenms-tickets @dev
-
-
+lnms plugin:add daryl-peterson/librenms-device-importer @dev
 
 ## Add cron job
 
@@ -32,5 +30,4 @@ lnms plugin:add daryl-peterson/librenms-tickets @dev
 crontab -e
 
 */5  *    * * *   flock -n /tmp/plugin_queue.lock -c "/usr/bin/php /opt/librenms/artisan queue:work plugin_database_queue --stop-when-empty --tries=3" > /dev/null 2>&1
-
 ```

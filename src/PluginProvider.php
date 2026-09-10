@@ -13,12 +13,9 @@
 
 namespace DRP\DeviceImporter;
 
+use Throwable;
 
-use DRP\DeviceImporter\DbCheck;
-use DRP\DeviceImporter\Hooks\DeviceOverview;
-use DRP\DeviceImporter\Hooks\Menu;
-use DRP\DeviceImporter\Hooks\Page;
-use DRP\DeviceImporter\Hooks\Settings;
+
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
@@ -27,6 +24,14 @@ use LibreNMS\Interfaces\Plugins\Hooks\SettingsHook as SettingsHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SinglePageHook;
 use LibreNMS\Interfaces\Plugins\PluginManagerInterface;
 use LibreNMS\Plugins;
+
+// Plugin libs
+use DRP\DeviceImporter\Console\ProcessPluginQueue;
+use DRP\DeviceImporter\DbCheck;
+use DRP\DeviceImporter\Hooks\DeviceOverview;
+use DRP\DeviceImporter\Hooks\Menu;
+use DRP\DeviceImporter\Hooks\Page;
+use DRP\DeviceImporter\Hooks\Settings;
 
 /**
  * Device import service provider.
@@ -72,6 +77,13 @@ class PluginProvider extends ServiceProvider {
         $pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
         $pluginManager->publishHook($pluginName, SettingsHookInterface::class, Settings::class);
 
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ProcessPluginQueue::class,
+            ]);
+        }
+
+
         $this->clearCacheOnFirstRun();
     }
 
@@ -97,8 +109,8 @@ class PluginProvider extends ServiceProvider {
                 file_put_contents($lockFile, date('Y-m-d H:i:s'));
 
                 Log::info('Device Importer: First-run cache clear executed successfully.');
-            } catch (\Exception $e) {
-                Log::error('Device Importer: Failed to auto-clear cache: ' . $e->getMessage());
+            } catch (Throwable $e) {
+                doErrorMsg($e);
             }
         }
     }

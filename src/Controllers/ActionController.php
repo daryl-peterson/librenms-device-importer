@@ -14,22 +14,22 @@
 namespace DRP\DeviceImporter\Controllers;
 
 use Exception;
+use Throwable;
 
 /**
- * Framework Libs
+ * Laravel imports.
  */
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Routing\Redirector;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Plugin Libs
+ * Plugin imports.
  */
 
 use DRP\DeviceImporter\CsvProcessor;
@@ -41,7 +41,7 @@ use DRP\DeviceImporter\PluginSettings;
 use DRP\DeviceImporter\TraitHidePrivates;
 use DRP\DeviceImporter\TraitValidateAdmin;
 
-
+use function DRP\DeviceImporter\isAdmin;
 
 /**
  * Action Controller
@@ -78,13 +78,11 @@ class ActionController extends Controller {
     public function handle(Request $request): StreamedResponse|Redirector|RedirectResponse|null {
         $user = auth()->user();
 
-        if (! $user || ! $user->can('global-read')) {
+        if (! isAdmin()) {
             abort(403, 'Forbidden');
         }
 
         $action = (string) $request->input('action', '');
-        Log::debug('Action requested: ' . $action . ' by user: ' . Auth::id());
-
 
         return match ($action) {
             'export' => $this->export($request),
@@ -112,9 +110,8 @@ class ActionController extends Controller {
         try {
             $obj = new CsvProcessor();
             return $obj->export();
-        } catch (Exception $e) {
-            Log::error('Export error: ' . $e->getMessage() . PHP_EOL);
-            Log::error($e->getTraceAsString());
+        } catch (Throwable $e) {
+            doErrorMsg($e);
             return null;
         }
     }
@@ -186,9 +183,8 @@ class ActionController extends Controller {
                 'success',
                 'File uploaded successfully'
             );
-        } catch (Exception $e) {
-            Log::error('Upload error: ' . $e->getMessage() . PHP_EOL);
-            Log::error($e->getTraceAsString());
+        } catch (Throwable $e) {
+            doErrorMsg($e);
             return $this->redirect(
                 route('device-importer.upload'),
                 'error',

@@ -47,7 +47,7 @@ class DbCheck {
      * @since 0.0.1
      */
     public function __construct() {
-        $this->setDefaults();
+        self::setDefaults();
         $this->pluginCache = new PluginCache();
     }
 
@@ -115,7 +115,7 @@ class DbCheck {
      * @return void
      * @since 0.0.1
      */
-    private function setDefaults() {
+    public static function setDefaults() {
 
         // 1. Define the separate database connection
         config(["database.connections.plugin_db" => [
@@ -131,7 +131,7 @@ class DbCheck {
         ]]);
 
         // 2. Define the queue connection using that database
-        config(['queue.connections.plugin_database_queue' => [
+        config(['queue.connections.plugin_queue' => [
             'driver' => 'database',
             'table' => 'jobs',
             'queue' => 'default',

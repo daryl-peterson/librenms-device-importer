@@ -12,10 +12,13 @@
 
 namespace DRP\DeviceImporter;
 
+
+use Exception;
+use Throwable;
 use App\Actions\Device\ValidateDeviceAndCreate;
 use App\Models\Device;
 use DRP\DeviceImporter\TraitHidePrivates;
-use Exception;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -30,6 +33,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
  * @since       0.0.1
+ *
+ * @todo Add logic to get more info on the import and create screen for status.
  */
 class CsvProcessor {
     use TraitHidePrivates;
@@ -53,7 +58,7 @@ class CsvProcessor {
     /**
      * Export devices to a CSV file.
      *
-     * @return StreamedResponse|null
+     * @return StreamedResponse|null If the export is successful, returns a StreamedResponse; otherwise, returns null.
      * @since 0.0.1
      */
     public function export(): ?StreamedResponse {
@@ -65,8 +70,6 @@ class CsvProcessor {
 
             $fields = implode(',', $prefixedHeaders);
             $sql = "SELECT $fields FROM devices d";
-
-            Log::error('Executing SQL: ' . $sql);
 
             $results = DB::select($sql);
 
@@ -88,18 +91,24 @@ class CsvProcessor {
             $response->headers->set('Content-Disposition', 'attachment; filename="librenms-export.csv"');
 
             return $response;
-        } catch (Exception $e) {
-            Log::error('Export error: ' . $e->getMessage() . PHP_EOL);
-            Log::error($e->getTraceAsString());
+        } catch (Throwable $e) {
+            doErrorMsg($e);
             return null;
         }
     }
 
 
+    /**
+     * Import devices from a CSV file.
+     *
+     * @param string $fileName The name of the CSV file to import.
+     * @return bool
+     * @since 0.0.1
+     * @throws Exception If the file cannot be opened.
+     */
     public function import(string $fileName): bool {
 
-        $path = storage_path('app/uploads/' . $fileName);
-        //$path = storage_path('uploads/' . $fileName);
+        $path = FileManager::getStorageDir() . $fileName;
 
         $handle = fopen($path, 'r');
         if ($handle === false) {
@@ -108,7 +117,7 @@ class CsvProcessor {
         }
 
         // Optional: If your CSV has a header row, read it first to skip or capture it
-        $headers = fgetcsv($handle);
+        $headers = fgetcsv($handle, null, ',', '"', "\n");
 
         while (($row = fgetcsv($handle, 0, ',')) !== false) {
             $result = $this->processCsvRow($row);
@@ -124,7 +133,7 @@ class CsvProcessor {
     /**
      * Process a single CSV row and create a device.
      *
-     * @param array $row
+     * @param array $row The CSV row to process.
      * @return bool
      */
     private function processCsvRow(array $row): bool {
@@ -156,9 +165,8 @@ class CsvProcessor {
             $objDevice = new Device($device);
             $result = (new ValidateDeviceAndCreate($objDevice))->execute();
             return $result;
-        } catch (\Throwable $th) {
-            Log::error('Error processing CSV row: ' . $th->getMessage() . PHP_EOL);
-            Log::error($th->getTraceAsString());
+        } catch (Throwable $th) {
+            doErrorMsg($th);
             return false;
         }
     }

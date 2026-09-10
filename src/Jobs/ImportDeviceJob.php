@@ -12,8 +12,11 @@
 
 namespace DRP\DeviceImporter\Jobs;
 
-use Exception;
 use DRP\DeviceImporter\CsvProcessor;
+use DRP\DeviceImporter\DbCheck;
+use DRP\DeviceImporter\FileManager;
+use Exception;
+use Throwable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -44,7 +47,7 @@ class ImportDeviceJob implements ShouldQueue {
     /**
      * Force this job onto your separate DB queue connection.
      */
-    public $connection = 'plugin_database_queue';
+    public $connection = 'plugin_queue';
 
     /**
      * Force failures to write to the exact same isolated database connection!
@@ -58,6 +61,8 @@ class ImportDeviceJob implements ShouldQueue {
      */
     public function __construct(string $fileName) {
         $this->fileName = $fileName;
+
+        DbCheck::setDefaults();
     }
 
     public function handle() {
@@ -67,14 +72,21 @@ class ImportDeviceJob implements ShouldQueue {
             Log::debug('Starting import for file: ' . $this->fileName);
             if (! $obj->import($this->fileName)) {
                 $this->fail("Import failed for file: $this->fileName");
+                $this->cleanup();
                 return;
             }
-
-        } catch (Exception $e) {
-            Log::error('Import error: ' . $e->getMessage() . PHP_EOL);
-            Log::error($e->getTraceAsString());
-            $this->fail("Import failed for file: $this->fileName ". PHP_EOL . $e->getTraceAsString());
+        } catch (Throwable $e) {
+            doErrorMsg($e);
+            $this->fail("Import failed for file: $this->fileName " . PHP_EOL . $e->getTraceAsString());
         }
+        $this->cleanup();
+    }
 
+    private function cleanup() {
+        try {
+            FileManager::deleteFile($this->fileName);
+        } catch (Throwable $th) {
+            doErrorMsg($th);
+        }
     }
 }

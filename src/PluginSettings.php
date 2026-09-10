@@ -13,6 +13,12 @@
 
 namespace DRP\DeviceImporter;
 
+use Throwable;
+
+/**
+ * Laravel imports.
+ */
+
 use App\Models\Plugin;
 use Illuminate\Support\Facades\Log;
 
@@ -110,8 +116,8 @@ class PluginSettings {
 
             $this->plugin->settings = $this->settings;
             return $this->plugin->save();
-        } catch (\Exception $e) {
-            Log::error('Failed to save plugin settings: ' . $e->getMessage());
+        } catch (Throwable $e) {
+            doErrorMsg($e);
             return false;
         }
     }
@@ -163,8 +169,8 @@ class PluginSettings {
 
             $this->plugin->settings = $this->settings;
             return $this->plugin->save();
-        } catch (\Exception $e) {
-            Log::error('Failed to delete plugin setting: ' . $e->getMessage());
+        } catch (Throwable $e) {
+            doErrorMsg($e);
             return false;
         }
     }
