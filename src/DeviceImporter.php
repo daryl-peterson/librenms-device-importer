@@ -43,7 +43,7 @@ class DeviceImporter {
     const PLUGIN        = 'device-importer';
     const TITLE         = 'Device Importer';
     const AUTHOR        = 'Daryl Peterson';
-    const VER           = '0.0.1';
+    const VER           = 'v0.1.0-alpha.08';
 
     /**
      * Constructor.

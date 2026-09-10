@@ -13,10 +13,13 @@
 
 use Illuminate\Support\Facades\Route;
 
+/**
+ * Plugin imports.
+ */
+
 use DRP\DeviceImporter\Controllers\ImportController;
 use DRP\DeviceImporter\Controllers\ActionController;
 use DRP\DeviceImporter\DbCheck;
-
 use DRP\DeviceImporter\DeviceImporter;
 
 $plugin = DeviceImporter::PLUGIN;
