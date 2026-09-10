@@ -13,15 +13,12 @@
 
 namespace DRP\DeviceImporter\Controllers;
 
-use DRP\DeviceImporter\CsvProcessor;
-use DRP\DeviceImporter\DbCheck;
-use DRP\DeviceImporter\DeviceImporter;
-use DRP\DeviceImporter\FileManager;
-use DRP\DeviceImporter\Jobs\ImportDeviceJob;
-use DRP\DeviceImporter\PluginSettings;
-use DRP\DeviceImporter\TraitHidePrivates;
-use DRP\DeviceImporter\TraitValidateAdmin;
 use Exception;
+
+/**
+ * Framework Libs
+ */
+
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -30,6 +27,20 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+
+/**
+ * Plugin Libs
+ */
+
+use DRP\DeviceImporter\CsvProcessor;
+use DRP\DeviceImporter\DbCheck;
+use DRP\DeviceImporter\DeviceImporter;
+use DRP\DeviceImporter\FileManager;
+use DRP\DeviceImporter\Jobs\ImportDeviceJob;
+use DRP\DeviceImporter\PluginSettings;
+use DRP\DeviceImporter\TraitHidePrivates;
+use DRP\DeviceImporter\TraitValidateAdmin;
+
 
 
 /**
@@ -169,14 +180,6 @@ class ActionController extends Controller {
             Log::debug('File added: ' . $fileName);
 
             ImportDeviceJob::dispatch($fileName);
-
-            /*
-            Artisan::call('queue:work', [
-                'connection' => 'plugin_database_queue',
-                '--stop-when-empty' => true,
-                '--tries' => 3,
-            ]);
-            */
 
             return $this->redirect(
                 $url,

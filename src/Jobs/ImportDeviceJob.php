@@ -12,6 +12,7 @@
 
 namespace DRP\DeviceImporter\Jobs;
 
+use Exception;
 use DRP\DeviceImporter\CsvProcessor;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
