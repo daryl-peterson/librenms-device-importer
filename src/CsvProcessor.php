@@ -17,7 +17,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Throwable;
+
 
 /**
  * Class description
@@ -84,33 +84,29 @@ class CsvProcessor {
 
     public function import(string $fileName): bool {
 
-        try {
 
-            //$path = storage_path('app/uploads/' . $fileName);
-            $path = storage_path('uploads2/' . $fileName);
 
-            $handle = fopen($path, 'r');
-            if ($handle === false) {
-                Log::error("Unable to open file: $path");
-                return false;
-            }
+        //$path = storage_path('app/uploads/' . $fileName);
+        $path = storage_path('uploads2/' . $fileName);
 
-            // Optional: If your CSV has a header row, read it first to skip or capture it
-            $headers = fgetcsv($handle);
-
-            while (($row = fgetcsv($handle, 0, ',')) !== false) {
-                // $row is now a simple numerical array of columns
-                // Example: access first column via $row[0]
-                Log::debug('CSV row: ', [$row]);
-            }
-
-            // Close the file pointer
-            fclose($handle);
-        } catch (Throwable $e) {
-            Log::error('Import error: ' . $e->getMessage() . PHP_EOL);
-            Log::error($e->getTraceAsString() . PHP_EOL);
-            return false;
+        $handle = fopen($path, 'r');
+        if ($handle === false) {
+            Log::error("Unable to open file: $path");
+            throw new Exception("Unable to open file: $path");
         }
+
+        // Optional: If your CSV has a header row, read it first to skip or capture it
+        $headers = fgetcsv($handle);
+
+        while (($row = fgetcsv($handle, 0, ',')) !== false) {
+            // $row is now a simple numerical array of columns
+            // Example: access first column via $row[0]
+            Log::debug('CSV row: ', [$row]);
+        }
+
+        // Close the file pointer
+        fclose($handle);
+
 
         return true;
     }

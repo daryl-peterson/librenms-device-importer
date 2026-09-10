@@ -12,12 +12,12 @@
 
 namespace DRP\DeviceImporter\Jobs;
 
+use DRP\DeviceImporter\CsvProcessor;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use DRP\DeviceImporter\CsvProcessor;
 
 
 /**
@@ -60,15 +60,20 @@ class ImportDeviceJob implements ShouldQueue {
     }
 
     public function handle() {
-        $obj = new CsvProcessor();
-        if (! $obj->import($this->fileName)) {
-            $this->fail("Import failed for file: $this->fileName");
-            return;
+
+        try {
+            $obj = new CsvProcessor();
+            Log::debug('Starting import for file: ' . $this->fileName);
+            if (! $obj->import($this->fileName)) {
+                $this->fail("Import failed for file: $this->fileName");
+                return;
+            }
+
+        } catch (Exception $e) {
+            Log::error('Import error: ' . $e->getMessage() . PHP_EOL);
+            Log::error($e->getTraceAsString());
+            $this->fail("Import failed for file: $this->fileName ". PHP_EOL . $e->getTraceAsString());
         }
 
-
-
-        // ...
-        Log::debug('Processing file: ', [$this->fileName]);
     }
 }

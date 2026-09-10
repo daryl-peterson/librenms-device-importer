@@ -17,6 +17,7 @@ use App\Models\Plugin;
 use Illuminate\Support\Facades\Log;
 
 use DRP\DeviceImporter\PluginSettings;
+use DRP\DeviceImporter\DbCheck;
 
 /**
  * Device Importer Plugin.

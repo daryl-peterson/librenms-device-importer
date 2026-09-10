@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class menu for the DeviceImporter plugin
+ * LibreNMS menu hook for the DeviceImporter plugin.
  *
  * @package     DeviceImporter
  * @author      Daryl Peterson <@gmail.com>
@@ -16,11 +16,8 @@ namespace DRP\DeviceImporter\Hooks;
 use App\Plugins\Hooks\MenuEntryHook;
 use DRP\DeviceImporter\DeviceImporter;
 
-
-
-
 /**
- * Class menu for the DeviceImporter plugin
+ * LibreNMS menu hook for the DeviceImporter plugin.
  *
  * @package     DeviceImporter
  * @author      Daryl Peterson <@gmail.com>

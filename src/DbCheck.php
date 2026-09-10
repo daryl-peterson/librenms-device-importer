@@ -14,7 +14,9 @@ namespace DRP\DeviceImporter;
 
 use DRP\DeviceImporter\DbTables;
 use DRP\DeviceImporter\PluginCache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use PDO;
 
 
 /**
@@ -114,10 +116,9 @@ class DbCheck {
      * @since 0.0.1
      */
     private function setDefaults() {
-        $conn = self::PLUGIN_DB_CONNECTION;
 
         // 1. Define the separate database connection
-        config(["database.connections.$conn" => [
+        config(["database.connections.plugin_db" => [
             'driver' => 'mysql',
             'host' => env('PLUGIN_DB_HOST', '127.0.0.1'),
             'port' => env('PLUGIN_DB_PORT', '3306'),
@@ -135,12 +136,12 @@ class DbCheck {
             'table' => 'jobs',
             'queue' => 'default',
             'retry_after' => 90,
-            'connection' => $conn, // Points to the connection above
+            'connection' => 'plugin_db', // Points to the connection above
         ]]);
 
         config(['queue.failed' => [
             'driver' => 'database-uuids',
-            'database' => $conn, // Points to your separate database connection
+            'database' => 'plugin_db', // Points to your separate database connection
             'table' => 'failed_jobs',
         ]]);   # Code Here
     }
@@ -154,9 +155,14 @@ class DbCheck {
     private function checkTables(): bool {
         $required = ['jobs', 'failed_jobs'];
         try {
+
             DbTables::createTables();
-            $tables = \DB::connection(self::PLUGIN_DB_CONNECTION)->select('SHOW TABLES');
-            $tables = array_map('current', $tables);
+
+            $tables = DB::connection(self::PLUGIN_DB_CONNECTION)
+                ->getPdo()
+                ->query('SHOW TABLES')
+                ->fetchAll(PDO::FETCH_COLUMN);
+
             foreach ($required as $table) {
                 if (!in_array($table, $tables)) {
                     $this->pluginCache->set(self::CACHE_DB_ERROR, "Missing table: $table");

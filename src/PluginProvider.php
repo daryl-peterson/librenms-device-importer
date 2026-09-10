@@ -28,8 +28,6 @@ use LibreNMS\Interfaces\Plugins\Hooks\SinglePageHook;
 use LibreNMS\Interfaces\Plugins\PluginManagerInterface;
 use LibreNMS\Plugins;
 
-
-
 /**
  * Device import service provider.
  *
@@ -48,7 +46,7 @@ class PluginProvider extends ServiceProvider {
     public function boot(): void {
         $pluginName = 'device-importer';
 
-        DbCheck::isReady();
+        DbCheck::isReady(true);
 
         /*
          * Compatibility view path.
@@ -59,20 +57,13 @@ class PluginProvider extends ServiceProvider {
          * Package views can also be referenced as:
          * device-importer::page
          */
-
-        $rootPath = base_path();
-        $viewPath = $rootPath . '/vendor/daryl-peterson/librenms-device-importer/resources/views';
         $paths = [
             __DIR__ . '/..',
             __DIR__ . '/../resources/views',
-            $viewPath,
+            //$viewPath,
 
         ];
-        //Log::debug('View paths: ' . PHP_EOL . print_r($paths, true));
-
-
         $this->loadViewsFrom($paths, 'device-importer');
-        //$this->loadViewsFrom(__DIR__ . '/../resources/views', 'librenms-device-importer');
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
         //$this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
