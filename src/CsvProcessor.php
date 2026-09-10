@@ -119,6 +119,12 @@ class CsvProcessor {
         return true;
     }
 
+    /**
+     * Process a single CSV row and create a device.
+     *
+     * @param array $row
+     * @return bool
+     */
     private function processCsvRow(array $row): bool {
 
         Log::debug('Processing CSV row: ' . PHP_EOL . print_r($row, true));
