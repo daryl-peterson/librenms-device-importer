@@ -46,7 +46,7 @@ class PluginProvider extends ServiceProvider {
     public function boot(): void {
         $pluginName = 'device-importer';
 
-        DbCheck::isReady(true);
+        DbCheck::isReady();
 
         /*
          * Compatibility view path.
