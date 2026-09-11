@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * LibreNMS Device Importer Helper.
+ *
+ * @package     device-importer
+ * @author      Daryl Peterson <@gmail.com>
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
+ * @since       0.0.1
+ */
+
+namespace DRP\DeviceImporter;
+
+use Illuminate\Support\Facades\Auth;
+use function Illuminate\Support\minutes;
+use function Illuminate\Support\days;
+
+/**
+ * LibreNMS Device Importer Helper.
+ *
+ * @package     device-importer
+ * @author      Daryl Peterson <@gmail.com>
+ * @copyright   Copyright (c) 2026, Daryl Peterson
+ * @license     https://opensource.org MIT License
+ * @link        https://github.com/daryl-peterson/
+ * @since       0.0.1
+ */
+class Helper {
+    public function __construct() {
+        # Code Here
+    }
+
+    /**
+     * Check if the current user is an admin.
+     *
+     * @return bool True if the current user is an admin, false otherwise.
+     * @since 0.0.1
+     */
+    public static function isAdmin(): bool {
+        if (!Auth::check() || !Auth::user()->hasRole('admin')) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Convert minutes to seconds.
+     *
+     * @param int $value The number of minutes.
+     * @return int The equivalent number of seconds.
+     * @since 0.0.1
+     */
+    public static function minutes(int $value): int {
+        $result = minutes($value);
+
+        return (int) $result->totalSeconds;
+    }
+
+    /**
+     * Convert days to seconds.
+     *
+     * @param int $value The number of days.
+     * @return int The equivalent number of seconds.
+     * @since 0.0.1
+     */
+    public static function days(int $value): int {
+        $result = days($value);
+
+        return (int) $result->totalSeconds;
+    }
+}

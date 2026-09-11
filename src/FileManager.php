@@ -24,7 +24,8 @@ use Throwable;
  */
 
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
+
+use DRP\DeviceImporter\Log;
 
 
 /**
@@ -56,7 +57,7 @@ class FileManager {
                 // Handle multiple file uploads
             }
         } catch (Throwable $th) {
-            doErrorMsg($th);
+            Log::error("Error adding file: " . $th->getMessage());
             return null;
         }
 
@@ -80,7 +81,7 @@ class FileManager {
                 return unlink($path);
             }
         } catch (Throwable $th) {
-            doErrorMsg($th);
+            Log::error("Error deleting file: " . $th->getMessage());
             return false;
         }
 
@@ -104,7 +105,7 @@ class FileManager {
             }
             Log::debug('All files deleted successfully.');
         } catch (Throwable $th) {
-            doErrorMsg($th);
+            Log::error("Error deleting all files: " . $th->getMessage());
         }
     }
 

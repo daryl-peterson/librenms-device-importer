@@ -34,11 +34,13 @@ use Illuminate\Support\Facades\Log;
  * @return void
  * @since 0.0.1
  */
-function doErrorMsg(Throwable $e) {
+function doErrorMsg(Throwable $e, string $class = '', string $method = '') {
     $limitedTrace = array_slice($e->getTrace(), 0, 5);
 
     $result = sprintf(
-        "Error: %s\nMessage: %s\nTrace: %s",
+        "Class: %s\nMethod: %s\nError: %s\nMessage: %s\nTrace: %s",
+        $class,
+        $method,
         get_class($e),
         $e->getMessage(),
         print_r($limitedTrace, true)

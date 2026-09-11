@@ -12,14 +12,27 @@
 
 namespace DRP\DeviceImporter;
 
-use DRP\DeviceImporter\DbTables;
-use DRP\DeviceImporter\PluginCache;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use PDO;
+/**
+ * Standard PHP imports.
+ */
+
 use Throwable;
 
+/**
+ * Laravel and application imports.
+ */
+
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
+
+
+/**
+ * Plugin imports.
+ */
+
+use DRP\DeviceImporter\Helper;
+use DRP\DeviceImporter\PluginCache;
+use DRP\DeviceImporter\Log;
 
 /**
  * LibreNMS Device Importer Database Check.
@@ -37,6 +50,9 @@ class PluginDb {
     const PLUGIN_DB_CONNECTION = 'plugin_db';
     const PLUGIN_DB_DATABASE = 'librenms_plugin_db';
     const PLUGIN_DB_USERNAME = 'plugin_user';
+
+
+
     const CACHE_RESULT_KEY = 'db_check_result';
     const CACHE_DATE_KEY = 'db_check_date';
     const CACHE_DB_ERROR = 'db_error';
@@ -71,7 +87,8 @@ class PluginDb {
      * @since 0.0.1
      */
     public function check(): bool {
-        if (!$this->checkDbUser() || !$this->checkConnection() || !$this->checkTables()) {
+        //if (!$this->checkDbUser() || !$this->checkConnection() || !$this->checkTables()) {
+        if (!$this->checkDbUser() || !$this->checkConnection()) {
             return false;
         }
         return true;
@@ -84,7 +101,8 @@ class PluginDb {
      * @since 0.0.1
      */
     private function checkDbUser(): bool {
-        $user = config('database.connections.plugin_db.username');
+        $conn = self::getDbConnection();
+        $user = config("database.connections.{$conn}.username");
         if ($user === self::PLUGIN_DB_USERNAME) {
             $this->pluginCache->set(
                 self::CACHE_DB_ERROR,
@@ -153,54 +171,52 @@ class PluginDb {
     /**
      * Check if the migrations table exists and install it if necessary.
      *
+     * @param bool $bypassCache Whether to bypass the cached result and perform a fresh check.
      * @return void
      * @since 0.0.1
      */
-    public static function checkMigrationsTable() {
+    public static function checkMigrationsTable(bool $bypassCache = false) {
+
         $conn = self::getDbConnection();
+        $objCache = new PluginCache();
+        $ttl = Helper::minutes(30);
+
+        Log::debug("Checking migrations table");
+
+        if ($objCache->has(PluginCache::DB_CHECK_DATE) && !$bypassCache) {
+            Log::debug("Migrations table check cached result found, skipping.");
+            return;
+        }
 
         try {
+            Log::debug("Starting migrations table check");
+
             // Check if the migrations table exists before attempting to install migrations
             if (! Schema::connection($conn)->hasTable('migrations')) {
                 Artisan::call('migrate:install', [
                     '--database' => $conn,
                 ]);
             }
+
+            Log::debug("Running migrations");
+
+            $result = Artisan::call('migrate', [
+                '--database' => $conn,
+                // Ensures migrations run without interactive prompts
+                '--force' => true,
+                // Optional: isolates to just your plugin files
+                '--path'     => 'vendor/daryl-peterson/librenms-device-importer/database/migrations',
+            ]);
+
+            $output = Artisan::output();
+            Log::debug("Migrations output: " . $output);
+
+            $objCache->set(PluginCache::DB_CHECK_RESULT, true);
         } catch (Throwable $th) {
-            doErrorMsg($th); //throw $th;
+            Log::error("Error checking migrations table: " . $th->getMessage());
+            $objCache->set(PluginCache::DB_CHECK_RESULT, false);
         }
-    }
-
-
-    /**
-     * Make sure required tables exist.
-     *
-     * @return boolean
-     * @since 0.0.1
-     */
-    private function checkTables(): bool {
-        $required = ['jobs', 'failed_jobs'];
-        try {
-
-            DbTables::createTables();
-
-            $conn = self::getDbConnection();
-            $tables = DB::connection($conn)
-                ->getPdo()
-                ->query('SHOW TABLES')
-                ->fetchAll(PDO::FETCH_COLUMN);
-
-            foreach ($required as $table) {
-                if (!in_array($table, $tables)) {
-                    $this->pluginCache->set(self::CACHE_DB_ERROR, "Missing table: $table");
-                    return false;
-                }
-            }
-            return true;
-        } catch (\Exception $e) {
-            $this->pluginCache->set(self::CACHE_DB_ERROR, $e->getMessage());
-            return false;
-        }
+        $objCache->set(PluginCache::DB_CHECK_DATE, now(), $ttl);
     }
 
     /**
@@ -221,7 +237,7 @@ class PluginDb {
         }
 
         $instance = new self();
-        $result = $instance->checkDbUser() && $instance->checkConnection() && $instance->checkTables();
+        $result = $instance->checkDbUser() && $instance->checkConnection();
         if ($result) {
             $objCache->set(self::CACHE_DB_ERROR, null);
         }

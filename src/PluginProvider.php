@@ -25,11 +25,17 @@ use Throwable;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\ServiceProvider;
+
+/**
+ * LibreNMS imports.
+ */
+
 use LibreNMS\Interfaces\Plugins\Hooks\MenuEntryHook as MenuEntryHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SettingsHook as SettingsHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SinglePageHook;
 use LibreNMS\Interfaces\Plugins\PluginManagerInterface;
 use LibreNMS\Plugins;
+
 
 /**
  * Plugin imports.
@@ -40,6 +46,7 @@ use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\Hooks\Menu;
 use DRP\DeviceImporter\Hooks\Page;
 use DRP\DeviceImporter\Hooks\Settings;
+use DRP\DeviceImporter\Log;
 
 /**
  * LibreNMS Device Importer Plugin Service Provider.
@@ -58,47 +65,48 @@ class PluginProvider extends ServiceProvider {
     }
 
     public function boot(): void {
-        $pluginName = 'device-importer';
+        try {
+            $pluginName = 'device-importer';
 
-        PluginDb::isReady();
+            PluginDb::isReady();
 
-        // Ensure the migrations table exists before loading migrations
-        PluginDb::checkMigrationsTable();
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+            // Ensure the migrations table exists before loading migrations
+            PluginDb::checkMigrationsTable();
+            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
-        /*
-         * Compatibility view path.
-         *
-         * LibreNMS local plugins commonly reference views like:
-         * device-importer::resources.views.page
-         *
-         * Package views can also be referenced as:
-         * device-importer::page
-         */
-        $paths = [
-            __DIR__ . '/..',
-            __DIR__ . '/../resources/views',
-        ];
-        $this->loadViewsFrom($paths, 'device-importer');
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+            /*
+            * Compatibility view path.
+            *
+            * LibreNMS local plugins commonly reference views like:
+            * device-importer::resources.views.page
+            *
+            * Package views can also be referenced as:
+            * device-importer::page
+            */
+            $paths = [
+                __DIR__ . '/..',
+                __DIR__ . '/../resources/views',
+            ];
+            $this->loadViewsFrom($paths, 'device-importer');
+            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
 
-        $pluginManager = $this->app->make(PluginManagerInterface::class);
-        $pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
-        $pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
-        $pluginManager->publishHook($pluginName, SettingsHookInterface::class, Settings::class);
+            $pluginManager = $this->app->make(PluginManagerInterface::class);
+            $pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
+            $pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
+            $pluginManager->publishHook($pluginName, SettingsHookInterface::class, Settings::class);
 
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                ProcessPluginQueue::class,
-            ]);
+            if ($this->app->runningInConsole()) {
+                $this->commands([
+                    ProcessPluginQueue::class,
+                ]);
+            }
+
+            $this->clearCacheOnFirstRun();
+        } catch (Throwable $th) {
+            Log::error("Error booting plugin provider: " . $th->getMessage());
         }
-
-        $this->clearCacheOnFirstRun();
     }
-
-
-
 
     /**
      * Clear cache on the first run of the plugin.
@@ -128,8 +136,8 @@ class PluginProvider extends ServiceProvider {
 
             // Create the lock file so this code never triggers again
             file_put_contents($lockFile, date('Y-m-d H:i:s'));
-        } catch (Throwable $e) {
-            doErrorMsg($e);
+        } catch (Throwable $th) {
+            Log::error("Error clearing cache on first run: " . $th->getMessage());
         }
     }
 }

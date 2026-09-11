@@ -3,19 +3,19 @@
 
 @section('content')
     <div style="margin-top:-12px; padding-bottom: 1em;">
-        @includeIf('device-importer::layouts.flash-messages')
+        @includeIf("$plugin::layouts.flash-messages")
     </div>
     <div class="container-fluid">
 
         <div class="col-sm-12 col-lg-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    @includeIf('device-importer::partials.breadcrumb')
+                    @includeIf("$plugin::partials.breadcrumb")
                 </div>
                 <div class="panel-body">
-                    @includeIf('device-importer::partials.author')
+                    @includeIf("$plugin::partials.author")
 
-                    <form method="POST" action="{{ url('plugin/device-importer/action') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ url("plugin/$plugin/action") }}" enctype="multipart/form-data">
                         @csrf
 
                         <input type="hidden" name="action" value="save">

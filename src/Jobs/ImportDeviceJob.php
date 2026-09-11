@@ -26,13 +26,14 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
+
 
 /**
  * Plugin imports.
  */
 
 use DRP\DeviceImporter\CsvProcessor;
+use DRP\DeviceImporter\Log;
 use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\FileManager;
 
@@ -96,7 +97,7 @@ class ImportDeviceJob implements ShouldQueue {
                 return;
             }
         } catch (Throwable $e) {
-            doErrorMsg($e);
+            Log::error("Import failed for file: $this->fileName " . PHP_EOL . $e->getTraceAsString());
             $this->fail("Import failed for file: $this->fileName " . PHP_EOL . $e->getTraceAsString());
         }
         $this->cleanup();

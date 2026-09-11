@@ -14,9 +14,8 @@
 namespace DRP\DeviceImporter\Hooks;
 
 use App\Plugins\Hooks\SettingsHook;
+use DRP\DeviceImporter\Log;
 use DRP\DeviceImporter\PluginData;
-
-
 
 /**
  * Settings for the Device Importer plugin.
@@ -41,6 +40,7 @@ class Settings extends SettingsHook {
     }
 
     public function getRouteName(): string {
+        Log::error("Get Route Name: plugin.$this->plugin.settings");
         // Return the exact name of the route you defined in your web.php routes file
         return "plugin.$this->plugin.settings";
     }
@@ -59,6 +59,7 @@ class Settings extends SettingsHook {
     public function data(array $settings = []): array {
         return [
             'info' => PluginData::getInfo(),
+            'plugin'   => PluginData::getPluginName(),
             'settings' => $settings,
         ];
     }

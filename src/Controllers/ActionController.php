@@ -13,6 +13,10 @@
 
 namespace DRP\DeviceImporter\Controllers;
 
+/**
+ * Standard PHP imports.
+ */
+
 use Exception;
 use Throwable;
 
@@ -24,7 +28,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Routing\Redirector;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -32,15 +35,15 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 
 use DRP\DeviceImporter\CsvProcessor;
-use DRP\DeviceImporter\PluginDb;
-use DRP\DeviceImporter\PluginData;
 use DRP\DeviceImporter\FileManager;
-use DRP\DeviceImporter\Jobs\ImportDeviceJob;
+use DRP\DeviceImporter\Helper;
+use DRP\DeviceImporter\Log;
+use DRP\DeviceImporter\PluginData;
+use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\PluginSettings;
 use DRP\DeviceImporter\TraitHidePrivates;
 use DRP\DeviceImporter\TraitValidateAdmin;
-use function DRP\DeviceImporter\isAdmin;
-use function DRP\DeviceImporter\doErrorMsg;
+use DRP\DeviceImporter\Jobs\ImportDeviceJob;
 
 /**
  * Action Controller
@@ -77,7 +80,7 @@ class ActionController extends Controller {
     public function handle(Request $request): StreamedResponse|Redirector|RedirectResponse|null {
         $user = auth()->user();
 
-        if (! isAdmin()) {
+        if (! Helper::isAdmin()) {
             abort(403, 'Forbidden');
         }
 
@@ -109,8 +112,8 @@ class ActionController extends Controller {
         try {
             $obj = new CsvProcessor();
             return $obj->export();
-        } catch (Throwable $e) {
-            doErrorMsg($e);
+        } catch (Throwable $th) {
+            Log::error("Error exporting CSV: " . $th->getMessage());
             return null;
         }
     }
@@ -154,7 +157,7 @@ class ActionController extends Controller {
                 );
             }
 
-            Log::error('CSV file error: ', [$file]);
+            Log::error('CSV file error: ' . $file->getError());
 
             $return = $request->validate([
                 'csv' => 'required|file|mimes:csv,txt',
@@ -185,8 +188,8 @@ class ActionController extends Controller {
                 'success',
                 'File uploaded successfully'
             );
-        } catch (Throwable $e) {
-            doErrorMsg($e);
+        } catch (Throwable $th) {
+            Log::error("Error during file upload: " . $th->getMessage());
             return $this->redirect(
                 route('device-importer.import'),
                 'error',

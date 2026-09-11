@@ -14,6 +14,8 @@ namespace DRP\DeviceImporter;
 
 use Throwable;
 
+use DRP\DeviceImporter\Log;
+
 /**
  * Class description
  *
@@ -48,7 +50,7 @@ class GitHubInfo {
                 return $data['tag_name'] ?? null;
             }
         } catch (Throwable $th) {
-            doErrorMsg($th);
+            Log::error("Error fetching latest GitHub release: " . $th->getMessage());
         }
 
 

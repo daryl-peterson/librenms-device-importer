@@ -12,10 +12,19 @@
 
 namespace DRP\DeviceImporter;
 
-use Illuminate\Support\Facades\Auth;
+/**
+ * Laravel imports.
+ */
+
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+/**
+ * Plugin imports.
+ */
+
+use DRP\DeviceImporter\Helper;
 
 trait TraitValidateAdmin {
     /**
@@ -30,7 +39,7 @@ trait TraitValidateAdmin {
      *
      */
     public function validateAdmin(): void {
-        if (!isAdmin()) {
+        if (!Helper::isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
     }

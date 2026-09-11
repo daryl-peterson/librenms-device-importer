@@ -18,12 +18,12 @@ namespace DRP\DeviceImporter;
  */
 
 use App\Models\Plugin as PluginModel;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Plugin imports.
  */
 
+use DRP\DeviceImporter\Log;
 use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\PluginSettings;
 
@@ -74,7 +74,6 @@ class PluginData {
      * @version 0.0.1
      */
     public static function getInfo() {
-        $plugin = self::PLUGIN;
 
         $result = array(
             'name'     => self::PLUGIN,
@@ -119,5 +118,9 @@ class PluginData {
         $obj = new PluginSettings();
         $settings = $obj->all();
         return $settings ?? [];
+    }
+
+    public static function getPluginName(): string {
+        return self::PLUGIN;
     }
 }

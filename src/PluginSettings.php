@@ -13,18 +13,9 @@
 
 namespace DRP\DeviceImporter;
 
-/**
- * Standard PHP imports.
- */
-
 use Throwable;
-
-/**
- * Laravel imports.
- */
-
 use App\Models\Plugin;
-
+use DRP\DeviceImporter\Log;
 
 /**
  * LibreNMS Device Importer Plugin Settings.
@@ -37,6 +28,8 @@ use App\Models\Plugin;
  * @since       0.0.1
  */
 class PluginSettings {
+
+
     /**
      * Import settings for the Device Importer plugin.
      *
@@ -120,8 +113,8 @@ class PluginSettings {
 
             $this->plugin->settings = $this->settings;
             return $this->plugin->save();
-        } catch (Throwable $e) {
-            doErrorMsg($e);
+        } catch (Throwable $th) {
+            Log::error("Error setting plugin setting: " . $th->getMessage());
             return false;
         }
     }
@@ -173,8 +166,8 @@ class PluginSettings {
 
             $this->plugin->settings = $this->settings;
             return $this->plugin->save();
-        } catch (Throwable $e) {
-            doErrorMsg($e);
+        } catch (Throwable $th) {
+            Log::error("Error deleting plugin setting: " . $th->getMessage());
             return false;
         }
     }

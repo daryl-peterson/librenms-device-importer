@@ -26,14 +26,15 @@ use Throwable;
 use App\Actions\Device\ValidateDeviceAndCreate;
 use App\Models\Device;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Plugin imports.
  */
 
+use DRP\DeviceImporter\Log;
 use DRP\DeviceImporter\TraitHidePrivates;
+
 
 /**
  * LibreNMS Device Importer CSV Processor class.
@@ -102,8 +103,8 @@ class CsvProcessor {
             $response->headers->set('Content-Disposition', 'attachment; filename="librenms-export.csv"');
 
             return $response;
-        } catch (Throwable $e) {
-            doErrorMsg($e);
+        } catch (Throwable $th) {
+            Log::error("Error exporting CSV: " . $th->getMessage());
             return null;
         }
     }
@@ -123,7 +124,7 @@ class CsvProcessor {
 
         $handle = fopen($path, 'r');
         if ($handle === false) {
-            Log::error("Unable to open file: $path");
+            Log::error("Error opening CSV file: " . $path);
             throw new Exception("Unable to open file: $path");
         }
 
@@ -177,19 +178,19 @@ class CsvProcessor {
             $result = (new ValidateDeviceAndCreate($objDevice))->execute();
             return $result;
         } catch (Throwable $th) {
-            doErrorMsg($th);
+            Log::error("Error processing CSV row: " . $th->getMessage());
             return false;
         }
     }
 
 
-   public function importArray(array $data): bool {
-       foreach ($data as $row) {
-           $result = $this->processCsvRow($row);
-           if (!$result) {
-               return false;
-           }
-       }
-       return true;
-   }
+    public function importArray(array $data): bool {
+        foreach ($data as $row) {
+            $result = $this->processCsvRow($row);
+            if (!$result) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

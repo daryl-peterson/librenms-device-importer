@@ -29,10 +29,17 @@ use DRP\DeviceImporter\PluginData;
  */
 class Page extends PageHook {
 
-	public function data(): array {
+    /**
+     * Get page data.
+     *
+     * @return array
+     * @version 0.0.1
+     */
+    public function data(): array {
 
-		return [
-			'info' => PluginData::getInfo(),
-		];
-	}
+        return [
+            'info' => PluginData::getInfo(),
+            'plugin' => PluginData::getPluginName(),
+        ];
+    }
 }

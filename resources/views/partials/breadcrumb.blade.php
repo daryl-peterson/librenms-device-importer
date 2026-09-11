@@ -9,8 +9,6 @@
             <div class="tw:inline-block tw:p-1" style="border-bottom: 0">
                 <span style="font-weight: bold">{{ $info['title'] }}</span> »
 
-
-
                 @if ($currentRouteName === 'plugin.page')
                     <span class="pagemenu-selected" style="margin-right: 4px">
                 @endif
@@ -19,43 +17,43 @@
                     <span>
                 @endif
 
-                <a href="{{ route('plugin.page', 'device-importer') }}" class="sync-filter-url">Plugin</a>
+                <a href="{{ route('plugin.page', $plugin) }}" class="sync-filter-url">Plugin</a>
                 </span>
 
                 @can('access-admin')
                     |
 
-                    @if ($currentRouteName === 'device-importer.settings')
+                    @if ($currentRouteName === "$plugin.settings")
                         <span class="pagemenu-selected" style="margin-right: 4px">
                     @endif
 
-                    @if ($currentRouteName !== 'device-importer.settings')
+                    @if ($currentRouteName !== "$plugin.settings")
                         <span>
                     @endif
 
-                    <a href="{{ route('device-importer.settings') }}" class="sync-filter-url">Settings</a>
+                    <a href="{{ route("$plugin.settings") }}" class="sync-filter-url">Settings</a>
                     </span>
                     @if (!isset($info['dbStatus']['error']))
-                        |@if ($currentRouteName === 'device-importer.export')
+                        |@if ($currentRouteName === "$plugin.export")
                             <span class="pagemenu-selected" style="margin-right: 4px">
                         @endif
 
-                        <a href="{{ route('device-importer.export') }}" class="sync-filter-url">Export</a>
-                        @if ($currentRouteName !== 'device-importer.export')
+                        <a href="{{ route("$plugin.export") }}" class="sync-filter-url">Export</a>
+                        @if ($currentRouteName !== "$plugin.export")
                             <span>
                         @endif
                         </span>
                         |
 
-                        @if ($currentRouteName === 'device-importer.import')
+                        @if ($currentRouteName === "$plugin.import")
                             <span class="pagemenu-selected" style="margin-right: 4px">
                         @endif
 
-                        @if ($currentRouteName !== 'device-importer.import')
+                        @if ($currentRouteName !== "$plugin.import")
                             <span>
                         @endif
 
-                        <a href="{{ route('device-importer.import') }}" class="sync-filter-url">Import</a>
+                        <a href="{{ route("$plugin.import") }}" class="sync-filter-url">Import</a>
                         </span>
                     @endif
                 @endcan
