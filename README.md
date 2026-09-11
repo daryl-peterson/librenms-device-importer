@@ -36,26 +36,26 @@ crontab -e
 
 ## Manual Export via MySQL
 ```bash
-SELECT 
-  'hostname', 
-  'hardware', 
-  'serial', 
-  'os', 
-  'snmpver', 
-  'community', 
+SELECT
+  'hostname',
+  'hardware',
+  'serial',
+  'os',
+  'snmpver',
+  'community',
   'snmp_disable'
 UNION ALL
-SELECT 
+SELECT
   d.hostname, 
-  d.hardware, 
-  d.serial, 
-  d.os, 
-  d.snmpver, 
-  d.community, 
-  d.snmp_disable 
-FROM devices d 
-INTO OUTFILE '/tmp/librenms-ott-devices.csv'
-FIELDS TERMINATED BY ',' 
+  d.hardware,
+  d.serial,
+  d.os,
+  d.snmpver,
+  d.community,
+  d.snmp_disable
+FROM devices d
+INTO OUTFILE '/tmp/librenms-devices.csv'
+FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\n';
 

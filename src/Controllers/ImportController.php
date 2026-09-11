@@ -25,7 +25,7 @@ use Illuminate\View\View;
  */
 
 use DRP\DeviceImporter\TraitHidePrivates;
-use DRP\DeviceImporter\DeviceImporter;
+use DRP\DeviceImporter\PluginData;
 use DRP\DeviceImporter\TraitValidateAdmin;
 
 /**
@@ -39,61 +39,61 @@ use DRP\DeviceImporter\TraitValidateAdmin;
  * @since       0.0.1
  */
 class ImportController extends Controller {
-    use TraitHidePrivates;
-    use TraitValidateAdmin;
+	use TraitHidePrivates;
+	use TraitValidateAdmin;
 
-    private array $info;
-    private string $plugin;
+	private array $info;
+	private string $plugin;
 
-    /**
-     * Constructor.
-     *
-     * @since 0.0.1
-     */
-    public function __construct() {
-        $this->info = DeviceImporter::getInfo();
-        $this->plugin = DeviceImporter::PLUGIN;
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @since 0.0.1
+	 */
+	public function __construct() {
+		$this->info = PluginData::getInfo();
+		$this->plugin = PluginData::PLUGIN;
+	}
 
 
-    public function index(): View {
+	public function index(): View {
 
-        return view("$this->plugin::page");
-    }
+		return view("$this->plugin::page");
+	}
 
-    /**
-     * Upload page.
-     *
-     * @return View
-     * @since 0.0.1
-     */
-    public function upload(): View {
-        $this->validateAdmin();
+	/**
+	 * Import page.
+	 *
+	 * @return View
+	 * @since 0.0.1
+	 */
+	public function import(): View {
+		$this->validateAdmin();
 
-        return view("$this->plugin::upload", ['info' => $this->info]);
-    }
+		return view("$this->plugin::import", ['info' => $this->info]);
+	}
 
-    /**
-     * Export page.
-     *
-     * @return View
-     * @since 0.0.1
-     */
-    public function export(): View {
-        $this->validateAdmin();
+	/**
+	 * Export page.
+	 *
+	 * @return View
+	 * @since 0.0.1
+	 */
+	public function export(): View {
+		$this->validateAdmin();
 
-        return view("$this->plugin::export", ['info' => $this->info]);
-    }
+		return view("$this->plugin::export", ['info' => $this->info]);
+	}
 
-    /**
-     * Settings page.
-     *
-     * @return View
-     * @since 0.0.1
-     */
-    public function settings(): View {
-        $this->validateAdmin();
+	/**
+	 * Settings page.
+	 *
+	 * @return View
+	 * @since 0.0.1
+	 */
+	public function settings(): View {
+		$this->validateAdmin();
 
-        return view("$this->plugin::settings", ['info' => $this->info]);
-    }
+		return view("$this->plugin::settings", ['info' => $this->info]);
+	}
 }

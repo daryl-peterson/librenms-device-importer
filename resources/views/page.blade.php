@@ -5,7 +5,7 @@
     <div class="col-sm-12 col-lg-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                @includeIf('device-importer::partials.menu')
+                @includeIf('device-importer::partials.breadcrumb')
 
             </div>
             <div class="panel-body">

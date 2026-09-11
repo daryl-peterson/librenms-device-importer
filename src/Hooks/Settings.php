@@ -14,8 +14,7 @@
 namespace DRP\DeviceImporter\Hooks;
 
 use App\Plugins\Hooks\SettingsHook;
-use Illuminate\Support\Facades\Log;
-use DRP\DeviceImporter\DeviceImporter;
+use DRP\DeviceImporter\PluginData;
 
 
 
@@ -38,7 +37,7 @@ class Settings extends SettingsHook {
     private string $plugin;
 
     public function __construct() {
-        $this->plugin = DeviceImporter::PLUGIN;
+        $this->plugin = PluginData::PLUGIN;
     }
 
     public function getRouteName(): string {
@@ -59,7 +58,7 @@ class Settings extends SettingsHook {
      */
     public function data(array $settings = []): array {
         return [
-            'info' => DeviceImporter::getInfo(),
+            'info' => PluginData::getInfo(),
             'settings' => $settings,
         ];
     }

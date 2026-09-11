@@ -17,14 +17,14 @@ namespace DRP\DeviceImporter;
  * Laravel and application imports.
  */
 
-use App\Models\Plugin;
+use App\Models\Plugin as PluginModel;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Plugin imports.
  */
 
-use DRP\DeviceImporter\DbCheck;
+use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\PluginSettings;
 
 
@@ -38,7 +38,7 @@ use DRP\DeviceImporter\PluginSettings;
  * @link        https://github.com/daryl-peterson/
  * @since       0.0.1
  */
-class DeviceImporter {
+class PluginData {
 
     const PLUGIN        = 'device-importer';
     const TITLE         = 'Device Importer';
@@ -84,8 +84,8 @@ class DeviceImporter {
             'image'    => 'https://avatars.githubusercontent.com/u/13834451?s=400&u=ff8417db6126da8d9ff82822ea0be5897ad744b3&v=4',
             'settings' => self::getSettings(),
             'dbStatus'  => [
-                'ready' => DbCheck::isReady(),
-                'error' => DbCheck::getError()
+                'ready' => PluginDb::isReady(),
+                'error' => PluginDb::getError()
             ],
         );
 
@@ -95,11 +95,11 @@ class DeviceImporter {
     /**
      * Get plugin object model.
      *
-     * @return Plugin|null
+     * @return PluginModel|null
      * @version 0.0.1
      */
-    public static function getPlugin(): Plugin|null {
-        $result = Plugin::where('plugin_name', self::PLUGIN)->first();
+    public static function getPluginModel(): PluginModel|null {
+        $result = PluginModel::where('plugin_name', self::PLUGIN)->first();
 
         // Check if the plugin exists in the database.
         if (is_null($result)) {

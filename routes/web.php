@@ -19,37 +19,37 @@ use Illuminate\Support\Facades\Route;
 
 use DRP\DeviceImporter\Controllers\ImportController;
 use DRP\DeviceImporter\Controllers\ActionController;
-use DRP\DeviceImporter\DbCheck;
-use DRP\DeviceImporter\DeviceImporter;
+use DRP\DeviceImporter\PluginDb;
+use DRP\DeviceImporter\PluginData;
 
-$plugin = DeviceImporter::PLUGIN;
+$plugin = PluginData::PLUGIN;
 
 
 /**
  * Upload route
  */
-if (DbCheck::isReady()) {
-    Route::middleware(['web'])
-        ->get("plugin/$plugin/upload", [ImportController::class, 'upload'])
-        ->name("$plugin.upload");
+if (PluginDb::isReady()) {
+	Route::middleware(['web'])
+		->get("plugin/$plugin/import", [ImportController::class, 'import'])
+		->name("$plugin.import");
 }
 
 
 Route::middleware(['web'])
-    ->get("plugin/$plugin/export", [ImportController::class, 'export'])
-    ->name("$plugin.export");
+	->get("plugin/$plugin/export", [ImportController::class, 'export'])
+	->name("$plugin.export");
 
 
 /**
  * Settings route
  */
 Route::middleware(['web'])
-    ->get("plugin/settings/$plugin", [ImportController::class, 'settings'])
-    ->name("$plugin.settings");
+	->get("plugin/settings/$plugin", [ImportController::class, 'settings'])
+	->name("$plugin.settings");
 
 /**
  * Action route
  */
 Route::middleware(['web'])
-    ->post("plugin/$plugin/action", [ActionController::class, 'handle'])
-    ->name("$plugin.action");
+	->post("plugin/$plugin/action", [ActionController::class, 'handle'])
+	->name("$plugin.action");

@@ -47,15 +47,15 @@
                         </span>
                         |
 
-                        @if ($currentRouteName === 'device-importer.upload')
+                        @if ($currentRouteName === 'device-importer.import')
                             <span class="pagemenu-selected" style="margin-right: 4px">
                         @endif
 
-                        @if ($currentRouteName !== 'device-importer.upload')
+                        @if ($currentRouteName !== 'device-importer.import')
                             <span>
                         @endif
 
-                        <a href="{{ route('device-importer.upload') }}" class="sync-filter-url">Upload</a>
+                        <a href="{{ route('device-importer.import') }}" class="sync-filter-url">Import</a>
                         </span>
                     @endif
                 @endcan

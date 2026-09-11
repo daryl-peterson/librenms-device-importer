@@ -24,7 +24,6 @@ use Throwable;
  */
 
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use LibreNMS\Interfaces\Plugins\Hooks\MenuEntryHook as MenuEntryHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SettingsHook as SettingsHookInterface;
@@ -37,7 +36,7 @@ use LibreNMS\Plugins;
  */
 
 use DRP\DeviceImporter\Console\ProcessPluginQueue;
-use DRP\DeviceImporter\DbCheck;
+use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\Hooks\Menu;
 use DRP\DeviceImporter\Hooks\Page;
 use DRP\DeviceImporter\Hooks\Settings;
@@ -55,12 +54,17 @@ use DRP\DeviceImporter\Hooks\Settings;
 class PluginProvider extends ServiceProvider {
 
     public function register(): void {
+        PluginDb::setDefaults();
     }
 
     public function boot(): void {
         $pluginName = 'device-importer';
 
-        DbCheck::isReady();
+        PluginDb::isReady();
+
+        // Ensure the migrations table exists before loading migrations
+        PluginDb::checkMigrationsTable();
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         /*
          * Compatibility view path.
@@ -78,6 +82,7 @@ class PluginProvider extends ServiceProvider {
         $this->loadViewsFrom($paths, 'device-importer');
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
+
         $pluginManager = $this->app->make(PluginManagerInterface::class);
         $pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
         $pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
@@ -92,6 +97,9 @@ class PluginProvider extends ServiceProvider {
         $this->clearCacheOnFirstRun();
     }
 
+
+
+
     /**
      * Clear cache on the first run of the plugin.
      *
@@ -101,24 +109,27 @@ class PluginProvider extends ServiceProvider {
      * @since 0.0.0.1
      */
     protected function clearCacheOnFirstRun() {
+
+
         // Path to a hidden lock file inside your plugin folder
         $lockFile = __DIR__ . '/.installed';
 
         // If the file doesn't exist, this is the first run
-        if (!file_exists($lockFile)) {
-            try {
-                // Programmatically run the equivalent of your 'lnms' commands
-                Artisan::call('route:clear');
-                Artisan::call('view:clear');
-                Artisan::call('cache:clear');
+        if (file_exists($lockFile)) {
+            return;
+        }
 
-                // Create the lock file so this code never triggers again
-                file_put_contents($lockFile, date('Y-m-d H:i:s'));
+        try {
 
-                Log::info('Device Importer: First-run cache clear executed successfully.');
-            } catch (Throwable $e) {
-                doErrorMsg($e);
-            }
+            // Programmatically run the equivalent of your 'lnms' commands
+            Artisan::call('route:clear');
+            Artisan::call('view:clear');
+            Artisan::call('cache:clear');
+
+            // Create the lock file so this code never triggers again
+            file_put_contents($lockFile, date('Y-m-d H:i:s'));
+        } catch (Throwable $e) {
+            doErrorMsg($e);
         }
     }
 }

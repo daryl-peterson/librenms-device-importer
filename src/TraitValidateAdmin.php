@@ -30,7 +30,7 @@ trait TraitValidateAdmin {
      *
      */
     public function validateAdmin(): void {
-        if (!Auth::check() || !Auth::user()->hasRole('admin')) {
+        if (!isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
     }

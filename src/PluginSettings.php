@@ -57,7 +57,7 @@ class PluginSettings {
      * @since 0.0.1
      */
     public function __construct() {
-        $this->plugin = DeviceImporter::getPlugin();
+        $this->plugin = PluginData::getPluginModel();
         $settings = null;
 
         if (is_null($this->plugin)) {

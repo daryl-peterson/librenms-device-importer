@@ -14,9 +14,11 @@ namespace DRP\DeviceImporter;
 
 use DRP\DeviceImporter\DbTables;
 use DRP\DeviceImporter\PluginCache;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use PDO;
+use Throwable;
 
 
 /**
@@ -29,7 +31,7 @@ use PDO;
  * @link        https://github.com/daryl-peterson/
  * @since       0.0.1
  */
-class DbCheck {
+class PluginDb {
     use TraitHidePrivates;
 
     const PLUGIN_DB_CONNECTION = 'plugin_db';
@@ -101,7 +103,8 @@ class DbCheck {
      */
     private function checkConnection(): bool {
         try {
-            \DB::connection('plugin_db')->getPdo();
+            $conn = self::getDbConnection();
+            \DB::connection($conn)->getPdo();
             return true;
         } catch (\Exception $e) {
             $this->pluginCache->set(self::CACHE_DB_ERROR, $e->getMessage());
@@ -116,9 +119,10 @@ class DbCheck {
      * @since 0.0.1
      */
     public static function setDefaults() {
+        $conn = self::getDbConnection();
 
         // 1. Define the separate database connection
-        config(["database.connections.plugin_db" => [
+        config(["database.connections.{$conn}" => [
             'driver' => 'mysql',
             'host' => env('PLUGIN_DB_HOST', '127.0.0.1'),
             'port' => env('PLUGIN_DB_PORT', '3306'),
@@ -136,15 +140,37 @@ class DbCheck {
             'table' => 'jobs',
             'queue' => 'default',
             'retry_after' => 90,
-            'connection' => 'plugin_db', // Points to the connection above
+            'connection' => $conn, // Points to the connection above
         ]]);
 
         config(['queue.failed' => [
             'driver' => 'database-uuids',
-            'database' => 'plugin_db', // Points to your separate database connection
+            'database' => $conn, // Points to your separate database connection
             'table' => 'failed_jobs',
         ]]);   # Code Here
     }
+
+    /**
+     * Check if the migrations table exists and install it if necessary.
+     *
+     * @return void
+     * @since 0.0.1
+     */
+    public static function checkMigrationsTable() {
+        $conn = self::getDbConnection();
+
+        try {
+            // Check if the migrations table exists before attempting to install migrations
+            if (! Schema::connection($conn)->hasTable('migrations')) {
+                Artisan::call('migrate:install', [
+                    '--database' => $conn,
+                ]);
+            }
+        } catch (Throwable $th) {
+            doErrorMsg($th); //throw $th;
+        }
+    }
+
 
     /**
      * Make sure required tables exist.
@@ -158,7 +184,8 @@ class DbCheck {
 
             DbTables::createTables();
 
-            $tables = DB::connection(self::PLUGIN_DB_CONNECTION)
+            $conn = self::getDbConnection();
+            $tables = DB::connection($conn)
                 ->getPdo()
                 ->query('SHOW TABLES')
                 ->fetchAll(PDO::FETCH_COLUMN);

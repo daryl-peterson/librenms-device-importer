@@ -13,15 +13,25 @@
 
 namespace DRP\DeviceImporter;
 
+/**
+ * PHP imports.
+ */
+
 use Throwable;
+
+/**
+ * Laravel imports.
+ */
+
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+
 
 /**
  * Log an error message for a Throwable.
  *
  * @param Throwable $e The exception or error to log.
  * @return void
- *
  * @since 0.0.1
  */
 function doErrorMsg(Throwable $e) {
@@ -36,11 +46,15 @@ function doErrorMsg(Throwable $e) {
     Log::error($result);
 }
 
-
+/**
+ * Check if the current user is an admin.
+ *
+ * @return bool True if the current user is an admin, false otherwise.
+ * @since 0.0.1
+ */
 function isAdmin(): bool {
-    if (auth()->user()?->hasRole('admin')) {
-        // User has the explicit 'admin' role assigned
-        return true;
+    if (!Auth::check() || !Auth::user()->hasRole('admin')) {
+        return false;
     }
-    return false;
+    return true;
 }

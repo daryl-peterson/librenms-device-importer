@@ -32,15 +32,15 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 
 use DRP\DeviceImporter\CsvProcessor;
-use DRP\DeviceImporter\DbCheck;
-use DRP\DeviceImporter\DeviceImporter;
+use DRP\DeviceImporter\PluginDb;
+use DRP\DeviceImporter\PluginData;
 use DRP\DeviceImporter\FileManager;
 use DRP\DeviceImporter\Jobs\ImportDeviceJob;
 use DRP\DeviceImporter\PluginSettings;
 use DRP\DeviceImporter\TraitHidePrivates;
 use DRP\DeviceImporter\TraitValidateAdmin;
-
 use function DRP\DeviceImporter\isAdmin;
+use function DRP\DeviceImporter\doErrorMsg;
 
 /**
  * Action Controller
@@ -127,12 +127,12 @@ class ActionController extends Controller {
         $this->validateAdmin();
 
         try {
-            DbCheck::isReady();
+            PluginDb::isReady();
 
             $file = $request->file('csv');
 
             Log::debug('CSV file: ', [$file]);
-            $url = route('device-importer.upload');
+            $url = route('device-importer.import');
             if (empty($file)) {
                 $type = 'error';
                 $message = 'No file uploaded';
@@ -154,6 +154,8 @@ class ActionController extends Controller {
                 );
             }
 
+            Log::error('CSV file error: ', [$file]);
+
             $return = $request->validate([
                 'csv' => 'required|file|mimes:csv,txt',
             ]);
@@ -174,8 +176,9 @@ class ActionController extends Controller {
             FileManager::deleteAll();
             $fileName = FileManager::addFile($file);
             Log::debug('File added: ' . $fileName);
+            $data = file($file->getRealPath());
 
-            ImportDeviceJob::dispatch($fileName);
+            ImportDeviceJob::dispatch($fileName, $data);
 
             return $this->redirect(
                 $url,
@@ -185,7 +188,7 @@ class ActionController extends Controller {
         } catch (Throwable $e) {
             doErrorMsg($e);
             return $this->redirect(
-                route('device-importer.upload'),
+                route('device-importer.import'),
                 'error',
                 'An error occurred during file upload'
             );
@@ -235,7 +238,7 @@ class ActionController extends Controller {
         $query = [];
 
         if (is_null($url)) {
-            $url = url('plugin/' . DeviceImporter::PLUGIN);
+            $url = url('plugin/' . PluginData::PLUGIN);
         }
 
         if ($type !== null) {

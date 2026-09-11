@@ -181,4 +181,15 @@ class CsvProcessor {
             return false;
         }
     }
+
+
+   public function importArray(array $data): bool {
+       foreach ($data as $row) {
+           $result = $this->processCsvRow($row);
+           if (!$result) {
+               return false;
+           }
+       }
+       return true;
+   }
 }

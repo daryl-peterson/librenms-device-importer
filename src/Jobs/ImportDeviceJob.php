@@ -33,9 +33,8 @@ use Illuminate\Support\Facades\Log;
  */
 
 use DRP\DeviceImporter\CsvProcessor;
-use DRP\DeviceImporter\DbCheck;
+use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\FileManager;
-
 
 /**
  * Import Job for devices from a CSV file
@@ -65,17 +64,20 @@ class ImportDeviceJob implements ShouldQueue {
     /**
      * Force failures to write to the exact same isolated database connection!
      */
-    public $failedConnection = 'plugin_db';
+    public $failedConnection = PluginDb::PLUGIN_DB_CONNECTION;
 
     /**
      * Object constructor.
      *
      * @param string $fileName The name of the CSV file to import.
+     * @param array $data The data from the CSV file.
      */
-    public function __construct(string $fileName) {
+    public function __construct(string $fileName, array $data) {
+        $this->failedConnection = PluginDb::getDbConnection();
         $this->fileName = $fileName;
+        $this->data = $data;
 
-        DbCheck::setDefaults();
+        PluginDb::setDefaults();
     }
 
     /**

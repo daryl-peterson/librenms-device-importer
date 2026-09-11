@@ -16,7 +16,7 @@ namespace DRP\DeviceImporter;
  * Plugin imports.
  */
 
-use DRP\DeviceImporter\DbCheck;
+use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\PluginCache;
 
 /**
@@ -31,28 +31,28 @@ use DRP\DeviceImporter\PluginCache;
  */
 class DbStatus {
 
-    /**
-     * Database ready status.
-     *
-     * @var bool
-     */
-    public bool $ready;
+	/**
+	 * Database ready status.
+	 *
+	 * @var bool
+	 */
+	public bool $ready;
 
-    /**
-     * Database error message.
-     *
-     * @var string|null
-     */
-    public ?string $error;
+	/**
+	 * Database error message.
+	 *
+	 * @var string|null
+	 */
+	public ?string $error;
 
-    /**
-     * Constructor.
-     *
-     * @since 0.0.1
-     */
-    public function __construct() {
-        # Code Here
-        $this->ready = DbCheck::isReady();
-        $this->error = PluginCache::get(DbCheck::CACHE_DB_ERROR);
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @since 0.0.1
+	 */
+	public function __construct() {
+		# Code Here
+		$this->ready = PluginDb::isReady();
+		$this->error = PluginCache::get(PluginDb::CACHE_DB_ERROR);
+	}
 }
