@@ -26,15 +26,19 @@ use Throwable;
 use App\Actions\Device\ValidateDeviceAndCreate;
 use App\Models\Device;
 use Illuminate\Support\Facades\DB;
+use LibreNMS\Exceptions\HostExistsException;
+use LibreNMS\Exceptions\HostUnreachableException;
+use LibreNMS\Exceptions\SnmpVersionUnsupportedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+
 
 /**
  * Plugin imports.
  */
 
-use DRP\DeviceImporter\Log;
-use DRP\DeviceImporter\TraitHidePrivates;
 
+use DRP\DeviceImporter\TraitHidePrivates;
+use DRP\DeviceImporter\Log;
 
 /**
  * LibreNMS Device Importer CSV Processor class.
@@ -64,6 +68,7 @@ class CsvProcessor {
      * Initializes object properties, specifically the CSV headers for import/export.
      */
     public function __construct() {
+        Log::debug('Initializing CsvProcessor object.');
         $this->csvHeaders = ['hostname', 'hardware', 'serial', 'os', 'snmpver', 'community', 'snmp_disable'];
     }
 
@@ -109,36 +114,27 @@ class CsvProcessor {
         }
     }
 
-
     /**
-     * Import devices from a CSV file.
+     * Import devices from an array of CSV data.
      *
-     * @param string $fileName The name of the CSV file to import.
+     * @param array $data The CSV data to import.
      * @return bool
      * @since 0.0.1
-     * @throws Exception If the file cannot be opened.
      */
-    public function import(string $fileName): bool {
+    public function import(array $data): bool {
+        Log::error('Starting import from array');
 
-        $path = FileManager::getStorageDir() . $fileName;
-
-        $handle = fopen($path, 'r');
-        if ($handle === false) {
-            Log::error("Error opening CSV file: " . $path);
-            throw new Exception("Unable to open file: $path");
+        $headers = array_shift($data);
+        if (!$this->isValidHeader($headers)) {
+            Log::error('CSV Header error:', $headers);
+            return false;
         }
 
-        // Optional: If your CSV has a header row, read it first to skip or capture it
-        $headers = fgetcsv($handle, null, ',', '"', "\n");
 
-        while (($row = fgetcsv($handle, 0, ',')) !== false) {
-            $result = $this->processCsvRow($row);
+        foreach ($data as $line) {
+            $cols = $this->lineToCols($line);
+            $result = $this->processCols($cols);
         }
-
-        // Close the file pointer
-        fclose($handle);
-
-
         return true;
     }
 
@@ -148,17 +144,40 @@ class CsvProcessor {
      * @param array $row The CSV row to process.
      * @return bool
      */
-    private function processCsvRow(array $row): bool {
+    private function processCols(array $row): bool {
 
         Log::debug('Processing CSV row: ' . PHP_EOL . print_r($row, true));
 
         try {
-            $expectCnt = count($this->csvHeaders);
-            if (count($row) !== $expectCnt) {
-                Log::error('CSV row does not match expected column count: ' . PHP_EOL . print_r($row, true));
+
+            $objDevice = $this->initDevice($row);
+            if (!$objDevice) {
                 return false;
             }
 
+            $result = (new ValidateDeviceAndCreate($objDevice))->execute();
+            return $result;
+        } catch (HostExistsException) {
+            Log::error("Host already exists: " . PHP_EOL . print_r($row, true));
+        } catch (HostUnreachableException) {
+            Log::error("Host unreachable: " . PHP_EOL . print_r($row, true));
+        } catch (SnmpVersionUnsupportedException) {
+            Log::error("SNMP version unsupported: " . PHP_EOL . print_r($row, true));
+        } catch (Throwable $th) {
+            Log::error("Error Processing CSV: " . $th->getMessage() . PHP_EOL . print_r($row, true));
+        }
+        return false;
+    }
+
+    /**
+     * Initialize a device array from a CSV row.
+     *
+     * @param array $row The CSV row to process.`
+     * @return Device|null The device model if it does not already exist, or null if invalid.
+     * @since 0.0.1
+     */
+    private function initDevice(array $row): ?Device {
+        try {
             $device = [];
             foreach ($row as $key => $value) {
 
@@ -169,28 +188,75 @@ class CsvProcessor {
 
                 $device[$col] = trim($value);
             }
+
+            // Ensure the device array has the expected number of columns.
+            $expectCnt = count($this->csvHeaders);
             if (count($device) !== $expectCnt) {
-                Log::error('Processed device does not match expected column count: ' . PHP_EOL . print_r($device, true));
-                return false;
+                Log::error('Device array does not match expected column count:', $device);
+                return null;
             }
 
-            $objDevice = new Device($device);
-            $result = (new ValidateDeviceAndCreate($objDevice))->execute();
-            return $result;
+            $model = Device::where('hostname', $device['hostname'])->first();
+            // If the device already exists, return null.
+            if ($model) {
+                return null;
+            }
+            return new Device($device);
         } catch (Throwable $th) {
-            Log::error("Error processing CSV row: " . $th->getMessage());
-            return false;
+            Log::error("Error initializing device: " . $th->getMessage());
+            return null;
         }
+        return null;
     }
 
+    /**
+     * Check if the expected headers match.
+     * @param string $headers CSV header row as a string
+     * @return bool
+     * @since 0.0.1
+     */
+    private function isValidHeader(string $headers): bool {
+        $headers = $this->lineToCols($headers);
 
-    public function importArray(array $data): bool {
-        foreach ($data as $row) {
-            $result = $this->processCsvRow($row);
-            if (!$result) {
+        foreach ($headers as $key => $header) {
+            $header = $this->sanitizeString($header);
+            $headers[$key] = $header;
+        }
+
+        foreach ($this->csvHeaders as $key => $header) {
+            $col = $headers[$key] ?? null;
+            if ($col !== $header) {
+
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Convert a CSV line to an array.
+     *
+     * @param string $line CSV line as a string
+     * @return array
+     * @since 0.0.1
+     */
+    private function lineToCols(string $line): array {
+        $line = $this->sanitizeString($line);
+        return explode(',', $line);
+    }
+
+    /**
+     * Sanitize a string by removing unwanted characters.
+     *
+     * @param string $string The string to sanitize
+     * @return string
+     * @since 0.0.1
+     */
+    private function sanitizeString(string $string): string {
+        $string = trim($string);
+        $string = preg_replace('/[^\x00-\x7F]/', '', $string);
+        $search = array("'", '"', "\r\n", "\n", "\r");
+        $string = str_replace($search, '', $string);
+        return $string;
     }
 }

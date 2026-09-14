@@ -179,17 +179,13 @@ class PluginDb {
 
         $conn = self::getDbConnection();
         $objCache = new PluginCache();
-        $ttl = Helper::minutes(30);
-
-        Log::debug("Checking migrations table");
+        $ttl = Helper::days(1);
 
         if ($objCache->has(PluginCache::DB_CHECK_DATE) && !$bypassCache) {
-            Log::debug("Migrations table check cached result found, skipping.");
             return;
         }
 
         try {
-            Log::debug("Starting migrations table check");
 
             // Check if the migrations table exists before attempting to install migrations
             if (! Schema::connection($conn)->hasTable('migrations')) {
@@ -197,8 +193,6 @@ class PluginDb {
                     '--database' => $conn,
                 ]);
             }
-
-            Log::debug("Running migrations");
 
             $result = Artisan::call('migrate', [
                 '--database' => $conn,
@@ -209,7 +203,7 @@ class PluginDb {
             ]);
 
             $output = Artisan::output();
-            Log::debug("Migrations output: " . $output);
+            Log::debug("Migrations output: " . PHP_EOL . $output);
 
             $objCache->set(PluginCache::DB_CHECK_RESULT, true);
         } catch (Throwable $th) {

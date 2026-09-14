@@ -68,7 +68,7 @@ class PluginProvider extends ServiceProvider {
         try {
             $pluginName = 'device-importer';
 
-            PluginDb::isReady();
+            //PluginDb::isReady();
 
             // Ensure the migrations table exists before loading migrations
             PluginDb::checkMigrationsTable();

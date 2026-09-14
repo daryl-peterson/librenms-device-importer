@@ -23,6 +23,7 @@ use Throwable;
  */
 
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
@@ -33,9 +34,8 @@ use Illuminate\Queue\SerializesModels;
  */
 
 use DRP\DeviceImporter\CsvProcessor;
-use DRP\DeviceImporter\Log;
 use DRP\DeviceImporter\PluginDb;
-use DRP\DeviceImporter\FileManager;
+use DRP\DeviceImporter\Log;
 
 /**
  * Import Job for devices from a CSV file
@@ -47,15 +47,13 @@ use DRP\DeviceImporter\FileManager;
  * @link        https://github.com/daryl-peterson/
  * @since       0.0.1
  */
-class ImportDeviceJob implements ShouldQueue {
+class ImportDeviceJob implements ShouldQueue, ShouldBeUnique {
     use Dispatchable, InteractsWithQueue, SerializesModels;
 
-    protected array $data;
-
     /**
-     * The name of the CSV file to import.
+     * The data from the CSV file to import.
      */
-    protected string $fileName;
+    protected array $data;
 
     /**
      * Force this job onto your separate DB queue connection.
@@ -68,15 +66,25 @@ class ImportDeviceJob implements ShouldQueue {
     public $failedConnection = PluginDb::PLUGIN_DB_CONNECTION;
 
     /**
+     * The number of seconds the job should be unique for.
+     */
+    public $uniqueFor = 3600;
+
+    /**
+     * The unique identifier for the job.
+     */
+    public $uniqueId = null;
+
+    /**
      * Object constructor.
      *
-     * @param string $fileName The name of the CSV file to import.
      * @param array $data The data from the CSV file.
+     * @since 0.0.1
      */
-    public function __construct(string $fileName, array $data) {
+    public function __construct(array $data) {
         $this->failedConnection = PluginDb::getDbConnection();
-        $this->fileName = $fileName;
         $this->data = $data;
+        $this->uniqueId = md5(json_encode($data));
 
         PluginDb::setDefaults();
     }
@@ -86,35 +94,21 @@ class ImportDeviceJob implements ShouldQueue {
      *
      * @return void
      */
-    public function handle() {
+    public function handle(): void {
 
-        try {
-            $obj = new CsvProcessor();
-            Log::debug('Starting import for file: ' . $this->fileName);
-            if (! $obj->import($this->fileName)) {
-                $this->fail("Import failed for file: $this->fileName");
-                $this->cleanup();
-                return;
-            }
-        } catch (Throwable $e) {
-            Log::error("Import failed for file: $this->fileName " . PHP_EOL . $e->getTraceAsString());
-            $this->fail("Import failed for file: $this->fileName " . PHP_EOL . $e->getTraceAsString());
-        }
-        $this->cleanup();
+
+        Log::debug('Import array: ', [$this->data]);
+
+        $obj = new CsvProcessor();
+        $obj->import($this->data);
     }
 
     /**
-     * Cleanup after the job is processed.
+     * Get the unique identifier for the job.
      *
-     * Deletes the CSV file used for import.
-     *
-     * @return void
+     * @return string|null
      */
-    private function cleanup() {
-        try {
-            FileManager::deleteFile($this->fileName);
-        } catch (Throwable $th) {
-            doErrorMsg($th);
-        }
+    public function uniqueId(): ?string {
+        return $this->uniqueId;
     }
 }

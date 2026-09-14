@@ -19,12 +19,14 @@ return new class extends Migration {
     public function up(): void {
         if (!Schema::connection($this->conn)->hasTable($this->tbl)) {
             Schema::connection($this->conn)->create($this->tbl, function (Blueprint $table) {
-                $table->bigIncrements('id');
-                $table->longText('connection');
-                $table->longText('queue');
-                $table->longText('payload');
-                $table->longText('exception');
-                $table->unsignedInteger('failed_at');
+                $table->id();
+                $table->string('uuid')->unique(); // Unique string ID for tracking and retrying
+                $table->text('connection');       // Name of the queue connection (e.g., redis, database)
+                $table->text('queue');            // Name of the specific queue (e.g., default, high)
+                $table->longText('payload');      // JSON-encoded string holding your serialized Job object
+                $table->longText('exception');    // The full error message and PHP stack trace
+                $table->timestamp('failed_at')
+                    ->useCurrent();
             });
         }
     }

@@ -30,20 +30,20 @@ class Log {
     private static array $ignoredClasses = [self::class];
 
     // 1. Public API Methods
-    public static function info(string $message, mixed $context = []): void {
+    public static function info(string $message, mixed $context = null): void {
         self::writeLog('INFO', $message);
     }
 
-    public static function debug(string $message, mixed $context = []): void {
+    public static function debug(string $message, mixed $context = null): void {
         self::writeLog('DEBUG', $message, $context);
     }
 
-    public static function error(string $message, mixed $context = []): void {
+    public static function error(string $message, mixed $context = null): void {
         self::writeLog('ERROR', $message, $context);
     }
 
     // 2. Centralized Writer and Tracer
-    private static function writeLog(string $level, string $message, mixed $context = []): void {
+    private static function writeLog(string $level, string $message, mixed $context = null): void {
 
         try {
             // Increase frame limit slightly since we added the internal 'writeLog' step
@@ -71,7 +71,7 @@ class Log {
             }
 
             $logEntry = sprintf(
-                "\n\nClass   : %s\nMethod  : %s\nLine    : %s\nFile    : %s\nMessage : %s\n",
+                "\nClass   : %s\nMethod  : %s\nLine    : %s\nFile    : %s\nMessage : %s\n",
                 $callerClass,
                 $callerFunction,
                 $callerLine,
@@ -79,24 +79,29 @@ class Log {
                 $message
             );
 
-            if (isset($context) && is_array($context) && !empty($context)) {
-                $logEntry .= "\nContext : " . print_r($context, true) . "\n";
-                unset($context);
-            }
-
-
-            if (isset($context) && is_object($context)) {
-                $logEntry .= "Context : " . print_r($context, true) . "\n";
-                unset($context);
-            }
-
-            if (isset($context)) {
-                Logger::log($level, $logEntry, $context);
-            } else {
+            if ($context === null) {
                 Logger::log($level, $logEntry);
+                return;
             }
+
+            if (is_array($context) || is_object($context)) {
+                $message .= PHP_EOL . print_r($context, true);
+            }
+
+            $logEntry = sprintf(
+                "\nClass   : %s\nMethod  : %s\nLine    : %s\nFile    : %s\nMessage : %s\n",
+                $callerClass,
+                $callerFunction,
+                $callerLine,
+                basename($callerFile),
+                $message
+            );
+
+
+
+            Logger::log($level, $logEntry);
         } catch (\Throwable $th) {
-            //throw $th;
+            Logger::error($th->getMessage(), ['exception' => $th]);
         }
     }
 }

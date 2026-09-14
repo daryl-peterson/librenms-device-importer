@@ -35,7 +35,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 
 use DRP\DeviceImporter\CsvProcessor;
-use DRP\DeviceImporter\FileManager;
 use DRP\DeviceImporter\Helper;
 use DRP\DeviceImporter\Log;
 use DRP\DeviceImporter\PluginData;
@@ -133,12 +132,11 @@ class ActionController extends Controller {
             PluginDb::isReady();
 
             $file = $request->file('csv');
-
-            Log::debug('CSV file: ', [$file]);
             $url = route('device-importer.import');
             if (empty($file)) {
                 $type = 'error';
                 $message = 'No file uploaded';
+                Log::error('No file uploaded');
                 return $this->redirect(
                     $url,
                     $type,
@@ -150,25 +148,23 @@ class ActionController extends Controller {
             if (! $file->isValid()) {
                 $type = 'error';
                 $message = 'Invalid file upload';
+                Log::error('Invalid file upload');
                 return $this->redirect(
                     $url,
                     $type,
                     $message
                 );
             }
-
-            Log::error('CSV file error: ' . $file->getError());
 
             $return = $request->validate([
                 'csv' => 'required|file|mimes:csv,txt',
             ]);
-            Log::debug('Validation result: ', [$return]);
 
             $mimeType = $file->getMimeType($file);
-            Log::debug('CSV MIME type: ' . $mimeType);
             if ($mimeType !== 'text/csv') {
                 $type = 'error';
                 $message = 'Invalid file';
+                Log::error('Invalid file MIME type: ' . $mimeType);
                 return $this->redirect(
                     $url,
                     $type,
@@ -176,12 +172,10 @@ class ActionController extends Controller {
                 );
             }
 
-            FileManager::deleteAll();
-            $fileName = FileManager::addFile($file);
-            Log::debug('File added: ' . $fileName);
-            $data = file($file->getRealPath());
-
-            ImportDeviceJob::dispatch($fileName, $data);
+            $data = file($file->getRealPath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $path = $file->getRealPath();
+            unlink($path);
+            ImportDeviceJob::dispatch($data);
 
             return $this->redirect(
                 $url,
