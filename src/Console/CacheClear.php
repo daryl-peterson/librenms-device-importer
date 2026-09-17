@@ -1,7 +1,7 @@
 <?php
 
 /**
- * LibreNMS Device Importer Plugin Process Plugin Queue Command.
+ * LibreNMS Device Importer Plugin Cache Clear Command.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -17,12 +17,12 @@ namespace DRP\DeviceImporter\Console;
  */
 
 use DRP\DeviceImporter\Log;
-use DRP\DeviceImporter\PluginDb;
+use DRP\DeviceImporter\PluginCache;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
+
 
 /**
- * LibreNMS Device Importer Plugin Process Plugin Queue Command.
+ * LibreNMS Device Importer Plugin Cache Clear Command.
  *
  * @package     device-importer
  * @author      Daryl Peterson <@gmail.com>
@@ -30,17 +30,17 @@ use Illuminate\Support\Facades\Artisan;
  * @link        https://github.com/daryl-peterson/
  * @since       0.0.1
  */
-class ProcessPluginQueue extends Command {
+class CacheClear extends Command {
 
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'device-importer:process-plugin-queue';
+    protected $signature = 'device-importer:cache-clear';
 
     /**
      * The console command description.
      */
-    protected $description = 'Injects configs dynamically and fires the Laravel queue worker';
+    protected $description = 'Clears the device importer cache';
 
     public function __construct() {
         parent::__construct();
@@ -53,29 +53,17 @@ class ProcessPluginQueue extends Command {
      */
     public function handle() {
 
-        $queueName = 'default';
         $tries = 3;
         $exitCode = 0;
 
         try {
-
-            $exitCode = Artisan::call("queue:work", [
-                'connection'          => 'plugin_queue',
-                '--stop-when-empty' => true,
-                '--tries'           => $tries
-            ]);
-
-            if ($exitCode === 2) {
-                Log::warning("Plugin queue completed, but some jobs failed. Output: " . Artisan::output());
-                $exitCode = 0;
-            }
-
-            if ($exitCode !== 0) {
-                Log::error("Queue worker exited with an error code [{$exitCode}]. Output: " . Artisan::output());
-                $exitCode = 1;
+            $keys = PluginCache::keys();
+            Log::info("Clearing cache keys: " . implode(', ', $keys));
+            foreach ($keys as $key) {
+                PluginCache::forget($key);
             }
         } catch (\Throwable $th) {
-            $this->error("Error processing plugin queue: " . $th->getMessage());
+            $this->error("Error clearing cache: " . $th->getMessage());
             return 1;
         }
         return $exitCode; // Return the determined exit code

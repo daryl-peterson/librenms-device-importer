@@ -16,14 +16,27 @@ namespace DRP\DeviceImporter;
  * Standard PHP imports.
  */
 
+use App\Models\Plugin;
+use Throwable;
+use DateTimeImmutable;
+
+/**
+ * Laravel and application imports.
+ */
+
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+
+/**
+ * Plugin database imports.
+ */
+
 use DRP\DeviceImporter\Helper;
 use DRP\DeviceImporter\Log;
 use DRP\DeviceImporter\PluginCache;
-use DRP\DeviceImporter\PluginData;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Schema;
-use Throwable;
 
 /**
  * LibreNMS Device Importer Database Check.
@@ -46,51 +59,56 @@ class PluginDb {
     const PLUGIN_DB_USERNAME    = 'plugin_user';
     const PLUGIN_DB_PASSWORD    = 'plugin_password';
 
-
-
-    const CACHE_RESULT_KEY = 'db_check_result';
-    const CACHE_DATE_KEY = 'db_check_date';
-    const CACHE_DB_ERROR = 'db_error';
-
-    private PluginCache $pluginCache;
+    /**
+     * Plugin cache instance
+     */
+    private static ?PluginCache $pluginCache = null;
 
     /**
-     * Constructor.
-     *
-     * @since 0.0.1
+     * Initialization flag
      */
-    public function __construct() {
-        self::setDefaults();
-        $this->pluginCache = new PluginCache();
-        $this->pluginCache->forget(self::CACHE_RESULT_KEY);
-        $this->pluginCache->forget(self::CACHE_DATE_KEY);
-        $this->pluginCache->forget(self::CACHE_DB_ERROR);
-    }
+    private static bool $initialized = false;
 
     /**
-     * Run the database check.
-     *
-     * @return boolean
-     * @since 0.0.1
+     * Database name
      */
-    public static function run(): bool {
-        $instance = new self();
-        return $instance->check();
-    }
+    private static ?string $dbName = null;
 
     /**
-     * Check the database and return the result.
+     * Database host
+     */
+    private static ?string $dbHost = null;
+
+    /**
+     * Database port
+     */
+    private static ?string $dbPort = null;
+
+    /**
+     * Database connection name
+     */
+    private static ?string $dbConnection = null;
+    /**
+     * Database username
+     */
+    private static ?string $dbUsername = null;
+
+    /**
+     * Database password
+     */
+    private static ?string $dbPassword = null;
+
+    /**
+     * Run the plugin database initialization and checks.
      *
-     * @return boolean
+     * @return void
      * @since 0.0.1
      */
-    public function check(): bool {
-
-        //if (!$this->checkDbUser() || !$this->checkConnection() || !$this->checkTables()) {
-        if (!$this->checkConnection()) {
-            return false;
+    public static function run(): void {
+        if (!self::checkConnection()) {
+            return;
         }
-        return true;
+        self::checkMigrationsTable();
     }
 
     /**
@@ -99,92 +117,46 @@ class PluginDb {
      * @return boolean
      * @since 0.0.1
      */
-    public function checkConnection(): bool {
+    public static function checkConnection(): bool {
+        $ttlPass = Helper::hours(1);
+        $ttlError = Helper::minutes(5);
+
+        if (!self::$initialized) {
+            self::initProperties();
+        }
+
         try {
+            $result = self::$pluginCache->get(PluginCache::DB_PASS, false);
+            if ($result) {
+                return true;
+            }
+
+            if (self::$pluginCache->has(PluginCache::DB_ERROR)) {
+                return false;
+            }
+
             $conn = self::getDbConnection();
-            \DB::connection($conn)->getPdo();
+            $result = DB::connection($conn)->getPdo();
+
+            self::$pluginCache->set(
+                PluginCache::DB_PASS,
+                true,
+                $ttlPass
+            );
+
             return true;
         } catch (\Exception $e) {
-            //$this->pluginCache->set(self::CACHE_DB_ERROR, $e->getMessage());
+            self::$pluginCache->set(
+                PluginCache::DB_PASS,
+                false,
+                $ttlError
+            );
+            self::$pluginCache->set(
+                PluginCache::DB_ERROR,
+                'Unable to connect to database',
+                $ttlError
+            );
             return false;
-        }
-    }
-
-    /**
-     * Set defaults for connection.
-     *
-     * @return void
-     * @since 0.0.1
-     */
-    public static function setDefaults() {
-        $trouble = false;
-
-        try {
-            //$settings = PluginData::getSettings();
-            $conn = PluginDb::PLUGIN_DB_CONNECTION;
-
-
-            if (Config::has("database.connections.{$conn}")) {
-                return;
-            }
-
-            $config = self::getDbConnectionConfig();
-
-            // 1. Inject the Database Connection Array into memory
-            Config::set("database.connections.{$conn}", $config);
-            $info = Config::get("database.connections.{$conn}");
-
-            // Mask the password for logging purposes
-            if (isset($info['password'])) {
-                $info['password'] = '********';
-            }
-
-            if ($trouble) {
-                Log::info(
-                    "Database connection info being injected: ",
-                    ["database.connections.{$conn}" => $info]
-                );
-            }
-
-            $config = [
-                'connection' => $conn,
-                'driver'     => 'database',
-                'table'      => 'jobs',
-                'queue'      => 'plugin_queue',
-                'retry_after' => 90,
-            ];
-
-            // 2. Inject the Queue Connection mapping that points to the DB above
-
-            Config::set('queue.connections.plugin_queue', $config);
-            $info = Config::get('queue.connections.plugin_queue');
-
-            if ($trouble) {
-                Log::info(
-                    "Queue connection info injected: ",
-                    ['queue.connections.plugin_queue' => $info]
-                );
-            }
-
-
-            $config = [
-                'driver' => 'database-uuids',
-                'database' => $conn,
-                'table' => 'failed_jobs',
-            ];
-
-            Config::set('queue.failed', $config);
-            $info = Config::get('queue.failed');
-
-
-            if ($trouble) {
-                Log::info(
-                    "Failed jobs queue connection info injected: ",
-                    ['queue.failed' => $info]
-                );
-            }
-        } catch (Throwable $th) {
-            Log::error("Error injecting plugin database configuration: " . $th->getMessage());
         }
     }
 
@@ -196,12 +168,21 @@ class PluginDb {
      * @since 0.0.1
      */
     public static function checkMigrationsTable(bool $bypassCache = false) {
+        $ttl_days = Helper::days(1);
+        $ttl_mins = Helper::minutes(5);
+
+        if (!self::$initialized) {
+            self::initProperties();
+        }
+
+        // Check database connection before proceeding
+        if (!self::checkConnection()) {
+            return;
+        }
 
         $conn = self::getDbConnection();
-        $objCache = new PluginCache();
-        $ttl = Helper::days(1);
 
-        if ($objCache->has(PluginCache::DB_CHECK_DATE) && !$bypassCache) {
+        if (self::$pluginCache->has(PluginCache::DB_MIGRATION_CHECK) && !$bypassCache) {
             return;
         }
 
@@ -225,12 +206,19 @@ class PluginDb {
             $output = Artisan::output();
             Log::debug("Migrations output: " . PHP_EOL . $output);
 
-            $objCache->set(PluginCache::DB_CHECK_RESULT, true);
+            self::$pluginCache->set(
+                PluginCache::DB_MIGRATION_CHECK,
+                true,
+                $ttl_days
+            );
         } catch (Throwable $th) {
             Log::error("Error checking migrations table: " . $th->getMessage());
-            $objCache->set(PluginCache::DB_CHECK_RESULT, false);
+            self::$pluginCache->set(
+                PluginCache::DB_MIGRATION_CHECK,
+                true,
+                $ttl_mins
+            );
         }
-        $objCache->set(PluginCache::DB_CHECK_DATE, now(), $ttl);
     }
 
     public static function hasPendingMigrations(): bool {
@@ -243,33 +231,6 @@ class PluginDb {
         return str_contains($output, 'No');
     }
 
-    /**
-     * Check if the database is ready.
-     *
-     * @param bool $bypassCache Whether to bypass the cached result and perform a fresh check.
-     * @return bool
-     * @since 0.0.1
-     */
-    public static function isReady(bool $bypassCache = false): bool {
-        $objCache = new PluginCache();
-
-        $has = $objCache->has(self::CACHE_RESULT_KEY);
-        if ($has && !$bypassCache) {
-
-            $result = $objCache->get(self::CACHE_RESULT_KEY);
-            return (bool) $result;
-        }
-
-        $instance = new self();
-        $result = $instance->checkConnection();
-        if ($result) {
-            $objCache->set(self::CACHE_DB_ERROR, null);
-        }
-
-        $objCache->set(self::CACHE_RESULT_KEY, $result);
-        $objCache->set(self::CACHE_DATE_KEY, time());
-        return $result;
-    }
 
     /**
      * Get the last database error message.
@@ -278,9 +239,8 @@ class PluginDb {
      * @since 0.0.1
      */
     public static function getError(): ?string {
-        $objCache = new PluginCache();
-        if ($objCache->has(self::CACHE_DB_ERROR)) {
-            return $objCache->get(self::CACHE_DB_ERROR);
+        if (self::$pluginCache->has(PluginCache::DB_ERROR)) {
+            return self::$pluginCache->get(PluginCache::DB_ERROR);
         }
         return null;
     }
@@ -292,7 +252,10 @@ class PluginDb {
      * @since 0.0.1
      */
     public static function getDbConnection(): string {
-        return env('PLUGIN_DB_CONNECTION', self::PLUGIN_DB_CONNECTION);
+        if (!isset(self::$dbConnection) || empty(self::$dbConnection)) {
+            self::initProperties();
+        }
+        return (string) self::$dbConnection;
     }
     /**
      * Get the database name.
@@ -301,23 +264,78 @@ class PluginDb {
      * @since 0.0.1
      */
     public static function getDbName(): string {
-        return env('PLUGIN_DB_DATABASE', self::PLUGIN_DB_DATABASE);
+        if (!isset(self::$dbName) || empty(self::$dbName)) {
+            self::initProperties();
+        }
+        return (string) self::$dbName;
     }
 
+    /**
+     * Initialize the plugin database and queue configuration.
+     *
+     * @return void
+     * @since 0.0.1
+     */
+    public static function initConfig(): void {
+        if (self::$initialized) {
+            return;
+        }
 
-    public static function getDbConnectionConfig() {
-        $settings = PluginData::getSettings();
+        self::initProperties();
 
+        // 1. Configure the database connection for the plugin
         $config = [
-            'driver'    => 'mysql',
-            'host'      => $settings['host'] ?? PluginDb::PLUGIN_DB_HOST,
-            'database'  => $settings['database'] ?? PluginDb::PLUGIN_DB_DATABASE,
-            'username'  => $settings['username'] ?? PluginDb::PLUGIN_DB_USERNAME,
-            'password'  => $settings['password'] ?? PluginDb::PLUGIN_DB_PASSWORD,
+            'driver'     => 'mysql',
+            'database'   => self::$dbName,
+            'host'       => self::$dbHost,
+            'port'       => self::$dbPort,
+            'username'   => self::$dbUsername,
+            'password'   => self::$dbPassword,
             'charset'   => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix'    => '',
         ];
-        return $config;
+        Config::set("database.connections." . self::$dbConnection, $config);
+
+        // 2. Inject the Queue Connection mapping that points to the DB above
+        $config = [
+            'connection' => self::$dbConnection,
+            'driver'     => 'database',
+            'table'      => 'jobs',
+            'queue'      => 'plugin_queue',
+            'retry_after' => 90,
+        ];
+
+        Config::set('queue.connections.plugin_queue', $config);
+
+        $config = [
+            'driver' => 'database-uuids',
+            'database' => self::$dbConnection,
+            'table' => 'failed_jobs',
+        ];
+
+        Config::set('queue.failed', $config);
+        self::$initialized = true;
+    }
+
+    /**
+     * Initialize the plugin database properties from environment variables.
+     *
+     * @return void
+     * @since 0.0.1
+     */
+    private static function initProperties(): void {
+        self::$pluginCache = new PluginCache();
+        self::$dbConnection = env('PLUGIN_DB_CONNECTION', self::PLUGIN_DB_CONNECTION);
+        self::$dbName = env('PLUGIN_DB_DATABASE', self::PLUGIN_DB_DATABASE);
+        self::$dbHost = env('PLUGIN_DB_HOST', self::PLUGIN_DB_HOST);
+        self::$dbPort = env('PLUGIN_DB_PORT', self::PLUGIN_DB_PORT);
+        self::$dbUsername = env('PLUGIN_DB_USERNAME', self::PLUGIN_DB_USERNAME);
+        self::$dbPassword = env('PLUGIN_DB_PASSWORD', self::PLUGIN_DB_PASSWORD);
+    }
+
+    private static function getDate(): string {
+        $date = new DateTimeImmutable();
+        return $date->format('Y-m-d H:i:s');
     }
 }

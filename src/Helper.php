@@ -14,7 +14,9 @@ namespace DRP\DeviceImporter;
 
 use Illuminate\Support\Facades\Auth;
 use function Illuminate\Support\minutes;
+use function Illuminate\Support\hours;
 use function Illuminate\Support\days;
+use DateTimeImmutable;
 
 /**
  * LibreNMS Device Importer Helper.
@@ -57,6 +59,12 @@ class Helper {
         return (int) $result->totalSeconds;
     }
 
+    public static function hours(int $value): int {
+        $result = hours($value);
+
+        return (int) $result->totalSeconds;
+    }
+
     /**
      * Convert days to seconds.
      *
@@ -68,5 +76,11 @@ class Helper {
         $result = days($value);
 
         return (int) $result->totalSeconds;
+    }
+
+
+    public static function getDate($format = 'Y-m-d H:i:s'): string {
+        $date = new DateTimeImmutable();
+        return $date->format($format);
     }
 }

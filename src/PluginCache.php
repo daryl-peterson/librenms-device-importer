@@ -27,7 +27,6 @@ use DateInterval;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Support\Facades\Cache;
 
-
 /**
  * LibreNMS Device Importer Plugin Cache.
  *
@@ -39,16 +38,58 @@ use Illuminate\Support\Facades\Cache;
  * @since       0.0.1
  */
 class PluginCache {
+    /**
+     * Cache tag for the plugin.
+     */
     const CACHE_TAG = 'device_importer';
+
+    /**
+     * Default time-to-live for cache entries.
+     */
     const TTL = 600; // 5 minutes
 
-    const DB_CHECK_RESULT = 'db_check_result';
-    const DB_CHECK_DATE = 'db_check_date';
+    /**
+     * Database cache keys for connection checks.
+     */
+    const DB_PASS = 'db_pass';
+
+    /**
+     * Database cache key for migration checks.
+     */
+    const DB_MIGRATION_CHECK = 'db_migration_check';
+
+    /**
+     * @var string The cache key for database errors.
+     */
     const DB_ERROR = 'db_error';
 
-    public function __construct() {
+    /**
+     * List of keys that have been set
+     *
+     * @var array
+     */
+    private static array $keys = [];
 
-        # Code Here
+    private static $default = [
+        self::DB_PASS => false,
+        self::DB_ERROR => null,
+        self::DB_MIGRATION_CHECK => false,
+    ];
+
+    /**
+     * Get all cache entries for the plugin.
+     *
+     * @return array
+     *
+     * @since 0.0.1
+     */
+    public static function all(): array {
+        self::init();
+        $all = [];
+        foreach (self::$keys as $key => $_) {
+            $all[$key] = self::get($key, self::$default[$key] ?? null);
+        }
+        return $all;
     }
 
     /**
@@ -63,11 +104,13 @@ class PluginCache {
     public static function get(UnitEnum|string $cacheKey, mixed $default = null): mixed {
 
         if (Cache::getStore() instanceof TaggableStore) {
-            return Cache::tags([self::CACHE_TAG])->get($cacheKey, $default);
+            $result = Cache::tags([self::CACHE_TAG])->get($cacheKey, $default);
+        } else {
+            $result = Cache::get($cacheKey, $default);
         }
-
-        return Cache::get($cacheKey, $default);
+        return $result;
     }
+
 
     /**
      * Store an item in the cache.
@@ -80,6 +123,11 @@ class PluginCache {
      * @since 0.0.1
      */
     public static function set(UnitEnum|string $cacheKey, mixed $cacheValue, DateTimeInterface|DateInterval|int|null $ttl = self::TTL): bool {
+        self::init();
+        if (!key_exists($cacheKey, self::$keys)) {
+            self::$keys[$cacheKey] = true;
+        }
+
         if (Cache::getStore() instanceof TaggableStore) {
             return Cache::tags([self::CACHE_TAG])->put($cacheKey, $cacheValue, $ttl);
         } else {
@@ -96,6 +144,10 @@ class PluginCache {
      * @since 0.0.1
      */
     public static function forget(UnitEnum|string $cacheKey): bool {
+        if (isset(self::$keys[$cacheKey])) {
+            unset(self::$keys[$cacheKey]);
+        }
+
         if (Cache::getStore() instanceof TaggableStore) {
             return Cache::tags([self::CACHE_TAG])->forget($cacheKey);
         } else {
@@ -126,10 +178,37 @@ class PluginCache {
      * @since 0.0.1
      */
     public static function has(UnitEnum|string $cacheKey): bool {
+
         if (Cache::getStore() instanceof TaggableStore) {
             return Cache::tags([self::CACHE_TAG])->has($cacheKey);
         } else {
             return Cache::has($cacheKey);
+        }
+    }
+
+    /**
+     * Get all cache keys for the plugin.
+     *
+     * @return array
+     *
+     * @since 0.0.1
+     */
+    public static function keys(): array {
+        self::init();
+
+        return array_keys(self::$keys);
+    }
+
+    /**
+     * Initialize the cache keys if not already set.
+     *
+     * @return void
+     *
+     * @since 0.0.1
+     */
+    private static function init() {
+        if (!is_array(self::$keys) || empty(self::$keys)) {
+            self::$keys = self::$default;
         }
     }
 }

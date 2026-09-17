@@ -24,9 +24,8 @@ use App\Models\Plugin as PluginModel;
  */
 
 use DRP\DeviceImporter\Log;
-use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\PluginSettings;
-
+use DRP\DeviceImporter\PluginCache;
 
 /**
  * LibreNMS Device Importer Plugin.
@@ -74,6 +73,7 @@ class PluginData {
      * @version 0.0.1
      */
     public static function getInfo() {
+        $dbError = PluginCache::get(PluginCache::DB_ERROR);
 
         $result = array(
             'name'     => self::PLUGIN,
@@ -83,8 +83,8 @@ class PluginData {
             'image'    => 'https://avatars.githubusercontent.com/u/13834451?s=400&u=ff8417db6126da8d9ff82822ea0be5897ad744b3&v=4',
             'settings' => self::getSettings(),
             'dbStatus'  => [
-                'ready' => true,
-                'error' => null
+                'ready' => !$dbError,
+                'error' => $dbError
             ],
         );
 

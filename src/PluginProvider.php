@@ -19,36 +19,36 @@ namespace DRP\DeviceImporter;
 
 use Throwable;
 
+
 /**
  * Laravel and application imports.
  */
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Console\Scheduling\Schedule;
-
-/**
- * LibreNMS imports.
- */
-
 use LibreNMS\Interfaces\Plugins\Hooks\MenuEntryHook as MenuEntryHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SettingsHook as SettingsHookInterface;
 use LibreNMS\Interfaces\Plugins\Hooks\SinglePageHook;
 use LibreNMS\Interfaces\Plugins\PluginManagerInterface;
 use LibreNMS\Plugins;
 
-
 /**
  * Plugin imports.
  */
 
+use DRP\DeviceImporter\Console\CacheClear;
 use DRP\DeviceImporter\Console\CheckMigrationsCommand;
 use DRP\DeviceImporter\Console\ProcessPluginQueue;
-use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\Hooks\Menu;
 use DRP\DeviceImporter\Hooks\Page;
 use DRP\DeviceImporter\Hooks\Settings;
 use DRP\DeviceImporter\Log;
+use DRP\DeviceImporter\PluginDb;
+
+/**
+ * Define the plugin path constant.
+ */
 
 define(
     'DEVICE_IMPORTER_PATH',
@@ -67,15 +67,28 @@ define(
  */
 class PluginProvider extends ServiceProvider {
 
+    /**
+     * Register the plugin services.
+     *
+     * @since 0.0.1
+     */
+    public function register(): void {
+        PluginDb::initConfig();
+    }
 
 
+    /**
+     * Bootstrap the plugin services.
+     *
+     * @since 0.0.1
+     */
     public function boot(): void {
         try {
-            PluginDb::setDefaults();
+
             $pluginName = 'device-importer';
 
-            // Ensure the migrations table exists before loading migrations
-            PluginDb::checkMigrationsTable();
+            // Run the plugin database initialization and checks.
+            PluginDb::run();
             $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
             /*
@@ -104,6 +117,7 @@ class PluginProvider extends ServiceProvider {
                 $this->commands([
                     ProcessPluginQueue::class,
                     CheckMigrationsCommand::class,
+                    CacheClear::class,
                 ]);
             }
 

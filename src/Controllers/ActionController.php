@@ -17,32 +17,22 @@ namespace DRP\DeviceImporter\Controllers;
  * Standard PHP imports.
  */
 
+use DRP\DeviceImporter\CsvProcessor;
+use DRP\DeviceImporter\Helper;
+use DRP\DeviceImporter\Jobs\ImportDeviceJob;
+use DRP\DeviceImporter\Log;
+use DRP\DeviceImporter\PluginData;
+use DRP\DeviceImporter\PluginSettings;
+use DRP\DeviceImporter\TraitHidePrivates;
+use DRP\DeviceImporter\TraitValidateAdmin;
 use Exception;
-use Throwable;
-
-/**
- * Laravel imports.
- */
-
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-
-/**
- * Plugin imports.
- */
-
-use DRP\DeviceImporter\CsvProcessor;
-use DRP\DeviceImporter\Helper;
-use DRP\DeviceImporter\Log;
-use DRP\DeviceImporter\PluginData;
-use DRP\DeviceImporter\PluginDb;
-use DRP\DeviceImporter\PluginSettings;
-use DRP\DeviceImporter\TraitHidePrivates;
-use DRP\DeviceImporter\TraitValidateAdmin;
-use DRP\DeviceImporter\Jobs\ImportDeviceJob;
+use Throwable;
 
 /**
  * Action Controller
@@ -130,7 +120,6 @@ class ActionController extends Controller {
 
         try {
 
-
             $file = $request->file('csv');
             $url = route('device-importer.import');
             if (empty($file)) {
@@ -174,31 +163,9 @@ class ActionController extends Controller {
 
             $data = file($file->getRealPath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             $path = $file->getRealPath();
-            //unlink($path);
+            
 
-            $config = PluginDb::getDbConnectionConfig();
-            $databaseConnection = app('db.factory')->make($config, PluginDb::PLUGIN_DB_CONNECTION);
-
-
-            // 2. Resolve the explicit database connection instance from the manager
-            //$databaseConnection = app('db')->connection('plugin_db');
-
-            // 3. Manually construct the Database Queue Driver
-            $queueConnection = new \Illuminate\Queue\DatabaseQueue(
-                $databaseConnection,             // The DB connection instance
-                'jobs',                          // The physical table target inside librenms_plugin_db
-                'plugin_queue',                  // The default queue channel
-                90                               // Retry time value
-            );
-
-            // 4. FIX: Manually assign the application container to satisfy framework requirements
-            $queueConnection->setContainer(app());
-
-            // 5. Explicitly push your Job class directly to the custom worker container instance
-            $queueConnection->push(new ImportDeviceJob($data));
-
-            //ImportDeviceJob::dispatch($data);
-
+            Queue::connection('plugin_queue')->push(new ImportDeviceJob($data));
 
             return $this->redirect(
                 $url,

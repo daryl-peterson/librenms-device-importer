@@ -29,7 +29,6 @@ use DRP\DeviceImporter\Log;
  */
 class PluginSettings {
 
-
     /**
      * Import settings for the Device Importer plugin.
      *
