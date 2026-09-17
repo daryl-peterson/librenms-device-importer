@@ -16,29 +16,19 @@ namespace DRP\DeviceImporter;
  * Standard PHP imports.
  */
 
-use Exception;
-use Throwable;
-
-/**
- * Laravel and application imports.
- */
-
 use App\Actions\Device\ValidateDeviceAndCreate;
 use App\Models\Device;
+use DRP\DeviceImporter\Log;
+use DRP\DeviceImporter\Models\ImportStatusModel;
+use DRP\DeviceImporter\TraitHidePrivates;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use LibreNMS\Exceptions\HostExistsException;
 use LibreNMS\Exceptions\HostUnreachableException;
 use LibreNMS\Exceptions\SnmpVersionUnsupportedException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
-
-/**
- * Plugin imports.
- */
-
-
-use DRP\DeviceImporter\TraitHidePrivates;
-use DRP\DeviceImporter\Log;
 
 /**
  * LibreNMS Device Importer CSV Processor class.
@@ -122,18 +112,17 @@ class CsvProcessor {
      * @since 0.0.1
      */
     public function import(array $data): bool {
-        Log::error('Starting import from array');
+        Log::debug('Starting import from array');
 
         $headers = array_shift($data);
         if (!$this->isValidHeader($headers)) {
-            Log::error('CSV Header error:', $headers);
+            Log::error('CSV Header error:', [$headers]);
             return false;
         }
 
-
         foreach ($data as $line) {
             $cols = $this->lineToCols($line);
-            $result = $this->processCols($cols);
+            $this->processCols($cols);
         }
         return true;
     }
@@ -143,74 +132,79 @@ class CsvProcessor {
      *
      * @param array $row The CSV row to process.
      * @return bool
+     * @since 0.0.1
      */
     private function processCols(array $row): bool {
 
-        Log::debug('Processing CSV row: ' . PHP_EOL . print_r($row, true));
-
         try {
-
-            $objDevice = $this->initDevice($row);
-            if (!$objDevice) {
-                return false;
-            }
+            $device = $this->mapArray($row);
+            $objDevice = $this->initDevice($device);
 
             $result = (new ValidateDeviceAndCreate($objDevice))->execute();
+            if (!$result) {
+                $this->setImportStatus($device, true, 'Validation failed');
+                return false;
+            }
+            $this->setImportStatus($device, false, 'Success');
             return $result;
         } catch (HostExistsException) {
-            Log::error("Host already exists: " . PHP_EOL . print_r($row, true));
+            Log::error("Host already exists:", $device);
+            $this->setImportStatus($device, true, 'Host already exists');
         } catch (HostUnreachableException) {
-            Log::error("Host unreachable: " . PHP_EOL . print_r($row, true));
+            Log::error("Host unreachable:",  $device);
+            $this->setImportStatus($device, true, 'Host unreachable');
         } catch (SnmpVersionUnsupportedException) {
-            Log::error("SNMP version unsupported: " . PHP_EOL . print_r($row, true));
+            Log::error("SNMP version unsupported:",    $device);
+            $this->setImportStatus($device, true, 'SNMP version unsupported');
         } catch (Throwable $th) {
-            Log::error("Error Processing CSV: " . $th->getMessage() . PHP_EOL . print_r($row, true));
+            Log::error("Error Processing CSV: " . $th->getMessage(),  $device);
+            $this->setImportStatus($device, true, 'Error Processing CSV: ' . $th->getMessage());
         }
+
         return false;
+    }
+
+    /**
+     * Check if the device array has the expected number of columns.
+     *
+     * @param array $device The device array to check.
+     * @return bool True if the column count matches, false otherwise.
+     * @since 0.0.1
+     */
+    private function checkColCounts(array $device): bool {
+        $expectCnt = count($this->csvHeaders);
+        return count($device) === $expectCnt;
     }
 
     /**
      * Initialize a device array from a CSV row.
      *
-     * @param array $row The CSV row to process.`
-     * @return Device|null The device model if it does not already exist, or null if invalid.
+     * @param array $device The associative array representing the device.
+     * @return Device The device model if it does not already exist, or null if invalid.
+     * @throws Exception If the device array does not match the expected column count.
+     * @throws HostExistsException If the device already exists.
      * @since 0.0.1
      */
-    private function initDevice(array $row): ?Device {
-        try {
-            $device = [];
-            foreach ($row as $key => $value) {
+    private function initDevice(array $device): Device {
+        Log::debug('Initializing device from array:', $device);
 
-                $col = $this->csvHeaders[$key] ?? null;
-                if ($col === null) {
-                    continue;
-                }
-
-                $device[$col] = trim($value);
-            }
-
-            // Ensure the device array has the expected number of columns.
-            $expectCnt = count($this->csvHeaders);
-            if (count($device) !== $expectCnt) {
-                Log::error('Device array does not match expected column count:', $device);
-                return null;
-            }
-
-            $model = Device::where('hostname', $device['hostname'])->first();
-            // If the device already exists, return null.
-            if ($model) {
-                return null;
-            }
-            return new Device($device);
-        } catch (Throwable $th) {
-            Log::error("Error initializing device: " . $th->getMessage());
-            return null;
+        if (!$this->checkColCounts($device)) {
+            Log::error('Device array does not match expected column count:', $device);
+            throw new Exception('Device array does not match expected column count.');
         }
-        return null;
+
+
+        $model = Device::where('hostname', $device['hostname'])->first();
+        // If the device already exists, return null.
+        if ($model) {
+            throw new HostExistsException('Host already exists. ' . $device['hostname']);
+        }
+        return new Device($device);
     }
 
     /**
      * Check if the expected headers match.
+     *
      * @param string $headers CSV header row as a string
      * @return bool
      * @since 0.0.1
@@ -219,8 +213,7 @@ class CsvProcessor {
         $headers = $this->lineToCols($headers);
 
         foreach ($headers as $key => $header) {
-            $header = $this->sanitizeString($header);
-            $headers[$key] = $header;
+            $headers[$key] = $this->sanitizeString($header);
         }
 
         foreach ($this->csvHeaders as $key => $header) {
@@ -234,15 +227,38 @@ class CsvProcessor {
     }
 
     /**
+     * Map an indexed array to an associative array using CSV headers.
+     *
+     * @param array $array Indexed array of column values.
+     * @return array Associative array with column headers as keys.
+     * @since 0.0.1
+     */
+    private function mapArray(array $array): array {
+        $device = [];
+        foreach ($array as $key => $value) {
+
+            $col = $this->csvHeaders[$key] ?? null;
+            if ($col === null) {
+                continue;
+            }
+
+            $device[$col] = trim($value);
+        }
+
+        return $device;
+    }
+
+    /**
      * Convert a CSV line to an array.
      *
      * @param string $line CSV line as a string
-     * @return array
+     * @return array Indexed array of column values.
      * @since 0.0.1
      */
     private function lineToCols(string $line): array {
         $line = $this->sanitizeString($line);
-        return explode(',', $line);
+        $line = str_getcsv($line, ',', '"', "\n");
+        return $line;
     }
 
     /**
@@ -255,8 +271,35 @@ class CsvProcessor {
     private function sanitizeString(string $string): string {
         $string = trim($string);
         $string = preg_replace('/[^\x00-\x7F]/', '', $string);
-        $search = array("'", '"', "\r\n", "\n", "\r");
-        $string = str_replace($search, '', $string);
         return $string;
+    }
+
+    /**
+     * Set the import status for a device.
+     *
+     * @param array $device The device array.
+     * @param bool $failed Whether the import failed.
+     * @param string $status The import status message.
+     * @since 0.0.1
+     */
+    private function setImportStatus(array $device, bool $failed, string $status): void {
+
+        try {
+
+            ImportStatusModel::updateOrCreate(
+                [
+                    'hostname' => $device['hostname'] ?? 'unknown',
+                    'os' => $device['os'] ?? null,
+                    'snmpver' => $device['snmpver'] ?? null,
+                    'community' => $device['community'] ?? null,
+                    'snmp_disable' => $device['snmp_disable'] ?? false,
+                    'failed' => $failed,
+                    'status' => $status,
+                    'imported_at' => now(),
+                ]
+            );
+        } catch (Throwable $th) {
+            Log::error("Error setting import status: " . $th->getMessage());
+        }
     }
 }

@@ -31,7 +31,7 @@ class Log {
 
     // 1. Public API Methods
     public static function info(string $message, mixed $context = null): void {
-        self::writeLog('INFO', $message);
+        self::writeLog('INFO', $message, $context);
     }
 
     public static function debug(string $message, mixed $context = null): void {

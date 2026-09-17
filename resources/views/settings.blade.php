@@ -18,14 +18,42 @@
                     <form method="POST" action="{{ url("plugin/$plugin/action") }}" enctype="multipart/form-data">
                         @csrf
 
-                        <input type="hidden" name="action" value="save">
+
                         <div class="form-group">
-                            <label for="communities">SNMP Communities (Comma-Separated)</label>
-                            <input type="text" class="form-control" id="communities" name="communities"
-                                value="{{ $info['settings']['communities'] ?? '' }}" placeholder="community1, community2, community3">
+                            <label for="database">Database</label>
+                            <input type="text" class="form-control" id="database" name="database"
+                                value="{{ $info['settings']['database'] ?? 'librenms_plugin_db' }}" placeholder="database_name">
                         </div>
 
-                        <button type="submit" class="btn btn-primary pull-right">Save Settings</button>
+                        <div class="form-group">
+                            <label for="host">Database Host</label>
+                            <input type="text" class="form-control" id="host" name="host"
+                                value="{{ $info['settings']['host'] ?? '127.0.0.1' }}" placeholder="database_host">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="port">Database Port</label>
+                            <input type="text" class="form-control" id="port" name="port"
+                                value="{{ $info['settings']['port'] ?? '3306' }}" placeholder="database_port">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="username">Database Username</label>
+                            <input type="text" class="form-control" id="username" name="username"
+                                value="{{ $info['settings']['username'] ?? '' }}" placeholder="database_username">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Database Password</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                value="{{ $info['settings']['password'] ?? '' }}" placeholder="database_password">
+                        </div>
+
+
+                        <button type="submit" class="btn btn-primary pull-right" name="action" value="save"
+                            style="margin-left: 10px;">Save Settings</button>
+
+                        <button type="submit" class="btn btn-primary pull-right" name="action" value="test">Test Settings</button>
+
                     </form>
                 </div>
             </div>

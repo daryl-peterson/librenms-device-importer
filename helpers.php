@@ -13,40 +13,18 @@
 
 namespace DRP\DeviceImporter;
 
-/**
- * PHP imports.
- */
-
-use Throwable;
 
 /**
  * Laravel imports.
  */
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 
-/**
- * Log an error message for a Throwable.
- *
- * @param Throwable $e The exception or error to log.
- * @return void
- * @since 0.0.1
- */
-function doErrorMsg(Throwable $e, string $class = '', string $method = '') {
-    $limitedTrace = array_slice($e->getTrace(), 0, 5);
-
-    $result = sprintf(
-        "Class: %s\nMethod: %s\nError: %s\nMessage: %s\nTrace: %s",
-        $class,
-        $method,
-        get_class($e),
-        $e->getMessage(),
-        print_r($limitedTrace, true)
-    );
-    Log::error($result);
-}
+define(
+    'DEVICE_IMPORTER_PATH',
+    'vendor/daryl-peterson/librenms-device-importer/'
+);
 
 /**
  * Check if the current user is an admin.

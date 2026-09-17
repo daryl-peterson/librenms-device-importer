@@ -129,7 +129,7 @@ class ActionController extends Controller {
         $this->validateAdmin();
 
         try {
-            PluginDb::isReady();
+
 
             $file = $request->file('csv');
             $url = route('device-importer.import');
@@ -174,8 +174,31 @@ class ActionController extends Controller {
 
             $data = file($file->getRealPath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             $path = $file->getRealPath();
-            unlink($path);
-            ImportDeviceJob::dispatch($data);
+            //unlink($path);
+
+            $config = PluginDb::getDbConnectionConfig();
+            $databaseConnection = app('db.factory')->make($config, PluginDb::PLUGIN_DB_CONNECTION);
+
+
+            // 2. Resolve the explicit database connection instance from the manager
+            //$databaseConnection = app('db')->connection('plugin_db');
+
+            // 3. Manually construct the Database Queue Driver
+            $queueConnection = new \Illuminate\Queue\DatabaseQueue(
+                $databaseConnection,             // The DB connection instance
+                'jobs',                          // The physical table target inside librenms_plugin_db
+                'plugin_queue',                  // The default queue channel
+                90                               // Retry time value
+            );
+
+            // 4. FIX: Manually assign the application container to satisfy framework requirements
+            $queueConnection->setContainer(app());
+
+            // 5. Explicitly push your Job class directly to the custom worker container instance
+            $queueConnection->push(new ImportDeviceJob($data));
+
+            //ImportDeviceJob::dispatch($data);
+
 
             return $this->redirect(
                 $url,
@@ -201,8 +224,13 @@ class ActionController extends Controller {
      */
     public function save(Request $request): Redirector|RedirectResponse {
 
-        $communities = $request->input('communities', '');
-        $result = $this->settings->set('communities', $communities);
+        $database = $request->input('database', '');
+        $username = $request->input('username', '');
+        $password = $request->input('password', '');
+
+        $result = $this->settings->set('database', $database);
+        $result = $this->settings->set('username', $username) && $result;
+        $result = $this->settings->set('password', $password) && $result;
 
         $type = 'success';
         $message = 'Settings saved successfully';

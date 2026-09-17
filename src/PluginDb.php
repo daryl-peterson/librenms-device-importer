@@ -16,23 +16,14 @@ namespace DRP\DeviceImporter;
  * Standard PHP imports.
  */
 
-use Throwable;
-
-/**
- * Laravel and application imports.
- */
-
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Schema;
-
-
-/**
- * Plugin imports.
- */
-
 use DRP\DeviceImporter\Helper;
-use DRP\DeviceImporter\PluginCache;
 use DRP\DeviceImporter\Log;
+use DRP\DeviceImporter\PluginCache;
+use DRP\DeviceImporter\PluginData;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 /**
  * LibreNMS Device Importer Database Check.
@@ -45,11 +36,15 @@ use DRP\DeviceImporter\Log;
  * @since       0.0.1
  */
 class PluginDb {
+
     use TraitHidePrivates;
 
-    const PLUGIN_DB_CONNECTION = 'plugin_db';
-    const PLUGIN_DB_DATABASE = 'librenms_plugin_db';
-    const PLUGIN_DB_USERNAME = 'plugin_user';
+    const PLUGIN_DB_HOST        = '127.0.0.1';
+    const PLUGIN_DB_PORT        = '3306';
+    const PLUGIN_DB_CONNECTION  = 'plugin_db';
+    const PLUGIN_DB_DATABASE    = 'librenms_plugin_db';
+    const PLUGIN_DB_USERNAME    = 'plugin_user';
+    const PLUGIN_DB_PASSWORD    = 'plugin_password';
 
 
 
@@ -67,6 +62,9 @@ class PluginDb {
     public function __construct() {
         self::setDefaults();
         $this->pluginCache = new PluginCache();
+        $this->pluginCache->forget(self::CACHE_RESULT_KEY);
+        $this->pluginCache->forget(self::CACHE_DATE_KEY);
+        $this->pluginCache->forget(self::CACHE_DB_ERROR);
     }
 
     /**
@@ -87,27 +85,9 @@ class PluginDb {
      * @since 0.0.1
      */
     public function check(): bool {
-        //if (!$this->checkDbUser() || !$this->checkConnection() || !$this->checkTables()) {
-        if (!$this->checkDbUser() || !$this->checkConnection()) {
-            return false;
-        }
-        return true;
-    }
 
-    /**
-     * Check database user.
-     *
-     * @return boolean
-     * @since 0.0.1
-     */
-    private function checkDbUser(): bool {
-        $conn = self::getDbConnection();
-        $user = config("database.connections.{$conn}.username");
-        if ($user === self::PLUGIN_DB_USERNAME) {
-            $this->pluginCache->set(
-                self::CACHE_DB_ERROR,
-                'Invalid database user'
-            );
+        //if (!$this->checkDbUser() || !$this->checkConnection() || !$this->checkTables()) {
+        if (!$this->checkConnection()) {
             return false;
         }
         return true;
@@ -119,13 +99,13 @@ class PluginDb {
      * @return boolean
      * @since 0.0.1
      */
-    private function checkConnection(): bool {
+    public function checkConnection(): bool {
         try {
             $conn = self::getDbConnection();
             \DB::connection($conn)->getPdo();
             return true;
         } catch (\Exception $e) {
-            $this->pluginCache->set(self::CACHE_DB_ERROR, $e->getMessage());
+            //$this->pluginCache->set(self::CACHE_DB_ERROR, $e->getMessage());
             return false;
         }
     }
@@ -137,35 +117,75 @@ class PluginDb {
      * @since 0.0.1
      */
     public static function setDefaults() {
-        $conn = self::getDbConnection();
+        $trouble = false;
 
-        // 1. Define the separate database connection
-        config(["database.connections.{$conn}" => [
-            'driver' => 'mysql',
-            'host' => env('PLUGIN_DB_HOST', '127.0.0.1'),
-            'port' => env('PLUGIN_DB_PORT', '3306'),
-            'database' => env('PLUGIN_DB_DATABASE', self::PLUGIN_DB_DATABASE),
-            'username' => env('PLUGIN_DB_USERNAME', self::PLUGIN_DB_USERNAME),
-            'password' => env('PLUGIN_DB_PASSWORD', 'secret'),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-        ]]);
+        try {
+            //$settings = PluginData::getSettings();
+            $conn = PluginDb::PLUGIN_DB_CONNECTION;
 
-        // 2. Define the queue connection using that database
-        config(['queue.connections.plugin_queue' => [
-            'driver' => 'database',
-            'table' => 'jobs',
-            'queue' => 'default',
-            'retry_after' => 90,
-            'connection' => $conn, // Points to the connection above
-        ]]);
 
-        config(['queue.failed' => [
-            'driver' => 'database-uuids',
-            'database' => $conn, // Points to your separate database connection
-            'table' => 'failed_jobs',
-        ]]);   # Code Here
+            if (Config::has("database.connections.{$conn}")) {
+                return;
+            }
+
+            $config = self::getDbConnectionConfig();
+
+            // 1. Inject the Database Connection Array into memory
+            Config::set("database.connections.{$conn}", $config);
+            $info = Config::get("database.connections.{$conn}");
+
+            // Mask the password for logging purposes
+            if (isset($info['password'])) {
+                $info['password'] = '********';
+            }
+
+            if ($trouble) {
+                Log::info(
+                    "Database connection info being injected: ",
+                    ["database.connections.{$conn}" => $info]
+                );
+            }
+
+            $config = [
+                'connection' => $conn,
+                'driver'     => 'database',
+                'table'      => 'jobs',
+                'queue'      => 'plugin_queue',
+                'retry_after' => 90,
+            ];
+
+            // 2. Inject the Queue Connection mapping that points to the DB above
+
+            Config::set('queue.connections.plugin_queue', $config);
+            $info = Config::get('queue.connections.plugin_queue');
+
+            if ($trouble) {
+                Log::info(
+                    "Queue connection info injected: ",
+                    ['queue.connections.plugin_queue' => $info]
+                );
+            }
+
+
+            $config = [
+                'driver' => 'database-uuids',
+                'database' => $conn,
+                'table' => 'failed_jobs',
+            ];
+
+            Config::set('queue.failed', $config);
+            $info = Config::get('queue.failed');
+
+
+            if ($trouble) {
+                Log::info(
+                    "Failed jobs queue connection info injected: ",
+                    ['queue.failed' => $info]
+                );
+            }
+        } catch (Throwable $th) {
+            Log::error("Error injecting plugin database configuration: " . $th->getMessage());
+        }
     }
 
     /**
@@ -213,6 +233,16 @@ class PluginDb {
         $objCache->set(PluginCache::DB_CHECK_DATE, now(), $ttl);
     }
 
+    public static function hasPendingMigrations(): bool {
+        $conn = self::getDbConnection();
+        $migrations = Artisan::call('migrate:status', [
+            '--database' => $conn,
+            '--path'     => 'vendor/daryl-peterson/librenms-device-importer/database/migrations',
+        ]);
+        $output = Artisan::output();
+        return str_contains($output, 'No');
+    }
+
     /**
      * Check if the database is ready.
      *
@@ -231,7 +261,7 @@ class PluginDb {
         }
 
         $instance = new self();
-        $result = $instance->checkDbUser() && $instance->checkConnection();
+        $result = $instance->checkConnection();
         if ($result) {
             $objCache->set(self::CACHE_DB_ERROR, null);
         }
@@ -258,7 +288,7 @@ class PluginDb {
     /**
      * Get the database connection name.
      *
-     * @return string
+     * @return string The database connection name.
      * @since 0.0.1
      */
     public static function getDbConnection(): string {
@@ -267,10 +297,27 @@ class PluginDb {
     /**
      * Get the database name.
      *
-     * @return string
+     * @return string The database name.
      * @since 0.0.1
      */
     public static function getDbName(): string {
         return env('PLUGIN_DB_DATABASE', self::PLUGIN_DB_DATABASE);
+    }
+
+
+    public static function getDbConnectionConfig() {
+        $settings = PluginData::getSettings();
+
+        $config = [
+            'driver'    => 'mysql',
+            'host'      => $settings['host'] ?? PluginDb::PLUGIN_DB_HOST,
+            'database'  => $settings['database'] ?? PluginDb::PLUGIN_DB_DATABASE,
+            'username'  => $settings['username'] ?? PluginDb::PLUGIN_DB_USERNAME,
+            'password'  => $settings['password'] ?? PluginDb::PLUGIN_DB_PASSWORD,
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix'    => '',
+        ];
+        return $config;
     }
 }

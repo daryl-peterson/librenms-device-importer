@@ -22,10 +22,7 @@
     "autoload": {
         "psr-4": {
             "DRP\\DeviceImporter\\": "src/"
-        },
-         "files": [
-            "./helpers.php"
-        ]
+        }
     },
     "extra": {
         "laravel": {

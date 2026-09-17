@@ -25,6 +25,7 @@ use Throwable;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Console\Scheduling\Schedule;
 
 /**
  * LibreNMS imports.
@@ -41,12 +42,18 @@ use LibreNMS\Plugins;
  * Plugin imports.
  */
 
+use DRP\DeviceImporter\Console\CheckMigrationsCommand;
 use DRP\DeviceImporter\Console\ProcessPluginQueue;
 use DRP\DeviceImporter\PluginDb;
 use DRP\DeviceImporter\Hooks\Menu;
 use DRP\DeviceImporter\Hooks\Page;
 use DRP\DeviceImporter\Hooks\Settings;
 use DRP\DeviceImporter\Log;
+
+define(
+    'DEVICE_IMPORTER_PATH',
+    'vendor/daryl-peterson/librenms-device-importer/'
+);
 
 /**
  * LibreNMS Device Importer Plugin Service Provider.
@@ -60,15 +67,12 @@ use DRP\DeviceImporter\Log;
  */
 class PluginProvider extends ServiceProvider {
 
-    public function register(): void {
-        PluginDb::setDefaults();
-    }
+
 
     public function boot(): void {
         try {
+            PluginDb::setDefaults();
             $pluginName = 'device-importer';
-
-            //PluginDb::isReady();
 
             // Ensure the migrations table exists before loading migrations
             PluginDb::checkMigrationsTable();
@@ -99,8 +103,21 @@ class PluginProvider extends ServiceProvider {
             if ($this->app->runningInConsole()) {
                 $this->commands([
                     ProcessPluginQueue::class,
+                    CheckMigrationsCommand::class,
                 ]);
             }
+
+            // Wait until LibreNMS completely boots up
+
+            $this->app->booted(function () {
+                $schedule = $this->app->make(Schedule::class);
+
+                // Trigger your scheduled task safely
+                $schedule
+                    ->command('device-importer:process-plugin-queue')
+                    ->everyTwoMinutes();
+            });
+
 
             $this->clearCacheOnFirstRun();
         } catch (Throwable $th) {

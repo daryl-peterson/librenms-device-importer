@@ -1,9 +1,9 @@
 <?php
 
+use DRP\DeviceImporter\PluginDb;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use DRP\DeviceImporter\PluginDb;
 
 return new class extends Migration {
     private string $conn;
@@ -11,22 +11,23 @@ return new class extends Migration {
 
     public function __construct() {
         $this->conn = PluginDb::getDbConnection();
-        $this->tbl = 'failed_jobs';
+        $this->tbl = 'jobs';
     }
+
     /**
      * Run the migrations.
      */
     public function up(): void {
+        Schema::connection($this->conn)->dropIfExists($this->tbl);
         if (!Schema::connection($this->conn)->hasTable($this->tbl)) {
             Schema::connection($this->conn)->create($this->tbl, function (Blueprint $table) {
-                $table->id();
-                $table->string('uuid')->unique(); // Unique string ID for tracking and retrying
-                $table->text('connection');       // Name of the queue connection (e.g., redis, database)
-                $table->text('queue');            // Name of the specific queue (e.g., default, high)
-                $table->longText('payload');      // JSON-encoded string holding your serialized Job object
-                $table->longText('exception');    // The full error message and PHP stack trace
-                $table->timestamp('failed_at')
-                    ->useCurrent();
+                $table->bigIncrements('id');
+                $table->string('queue')->index();
+                $table->longText('payload');
+                $table->unsignedTinyInteger('attempts');
+                $table->unsignedInteger('reserved_at')->nullable();
+                $table->unsignedInteger('available_at');
+                $table->unsignedInteger('created_at');
             });
         }
     }

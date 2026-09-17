@@ -28,28 +28,28 @@ $plugin = PluginData::PLUGIN;
 /**
  * Upload route
  */
-if (PluginDb::isReady()) {
-	Route::middleware(['web'])
-		->get("plugin/$plugin/import", [ImportController::class, 'import'])
-		->name("$plugin.import");
-}
+//if (PluginDb::isReady()) {
+Route::middleware(['web'])
+    ->get("plugin/$plugin/import", [ImportController::class, 'import'])
+    ->name("$plugin.import");
+//}
 
 
 Route::middleware(['web'])
-	->get("plugin/$plugin/export", [ImportController::class, 'export'])
-	->name("$plugin.export");
+    ->get("plugin/$plugin/export", [ImportController::class, 'export'])
+    ->name("$plugin.export");
 
 
 /**
  * Settings route
  */
 Route::middleware(['web'])
-	->get("plugin/settings/$plugin", [ImportController::class, 'settings'])
-	->name("$plugin.settings");
+    ->get("plugin/settings/$plugin", [ImportController::class, 'settings'])
+    ->name("$plugin.settings");
 
 /**
  * Action route
  */
 Route::middleware(['web'])
-	->post("plugin/$plugin/action", [ActionController::class, 'handle'])
-	->name("$plugin.action");
+    ->post("plugin/$plugin/action", [ActionController::class, 'handle'])
+    ->name("$plugin.action");

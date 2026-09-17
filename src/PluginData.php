@@ -83,8 +83,8 @@ class PluginData {
             'image'    => 'https://avatars.githubusercontent.com/u/13834451?s=400&u=ff8417db6126da8d9ff82822ea0be5897ad744b3&v=4',
             'settings' => self::getSettings(),
             'dbStatus'  => [
-                'ready' => PluginDb::isReady(),
-                'error' => PluginDb::getError()
+                'ready' => true,
+                'error' => null
             ],
         );
 

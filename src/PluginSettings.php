@@ -61,13 +61,15 @@ class PluginSettings {
         $settings = $this->plugin->settings;
 
         if (!is_array($settings)) {
-            $settings = [];
-            $this->settings = $settings;
+            $defaults = $this->getDefaults();
+
+            Log::info('Plugin settings to default', ['defaults' => $defaults]);
+            $this->settings = $defaults;
             $this->plugin->settings = $this->settings;
             $this->plugin->save();
+        } else {
+            $this->settings = $settings;
         }
-
-        $this->settings = $settings;
     }
 
     /**
@@ -170,5 +172,22 @@ class PluginSettings {
             Log::error("Error deleting plugin setting: " . $th->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Get the default plugin settings.
+     *
+     * @return array
+     *
+     * @since 0.0.1
+     */
+    private function getDefaults(): array {
+        $settings = [];
+        $settings['database'] = PluginDb::PLUGIN_DB_DATABASE;
+        $settings['host'] = PluginDb::PLUGIN_DB_HOST;
+        $settings['port'] = PluginDb::PLUGIN_DB_PORT;
+        $settings['username'] = PluginDb::PLUGIN_DB_USERNAME;
+        $settings['password'] = PluginDb::PLUGIN_DB_PASSWORD;
+        return $settings;
     }
 }

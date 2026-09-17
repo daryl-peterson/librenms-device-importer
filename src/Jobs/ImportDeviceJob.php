@@ -16,7 +16,6 @@ namespace DRP\DeviceImporter\Jobs;
  * Standard PHP imports.
  */
 
-use Throwable;
 
 /**
  * Laravel and application imports.
@@ -27,7 +26,8 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-
+use Illuminate\Foundation\Queue\Queueable;
+//use Illuminate\Support\Facades\Log;
 
 /**
  * Plugin imports.
@@ -49,6 +49,7 @@ use DRP\DeviceImporter\Log;
  */
 class ImportDeviceJob implements ShouldQueue, ShouldBeUnique {
     use Dispatchable, InteractsWithQueue, SerializesModels;
+    use Queueable;
 
     /**
      * The data from the CSV file to import.
@@ -58,7 +59,7 @@ class ImportDeviceJob implements ShouldQueue, ShouldBeUnique {
     /**
      * Force this job onto your separate DB queue connection.
      */
-    public $connection = 'plugin_queue';
+    //public $connection = 'plugin_db';
 
     /**
      * Force failures to write to the exact same isolated database connection!
@@ -68,12 +69,12 @@ class ImportDeviceJob implements ShouldQueue, ShouldBeUnique {
     /**
      * The number of seconds the job should be unique for.
      */
-    public $uniqueFor = 3600;
+    //public $uniqueFor = 3600;
 
     /**
      * The unique identifier for the job.
      */
-    public $uniqueId = null;
+    //public $uniqueId = null;
 
     /**
      * Object constructor.
@@ -82,12 +83,15 @@ class ImportDeviceJob implements ShouldQueue, ShouldBeUnique {
      * @since 0.0.1
      */
     public function __construct(array $data) {
-        $this->failedConnection = PluginDb::getDbConnection();
-        $this->data = $data;
-        $this->uniqueId = md5(json_encode($data));
+        $this->connection = 'plugin_db';
+        $this->queue = 'plugin_queue';
 
-        PluginDb::setDefaults();
+
+        //$this->failedConnection = PluginDb::getDbConnection();
+        $this->data = $data;
+        Log::info("Import job created with data: ", ['OBJECT' => $this]);
     }
+
 
     /**
      * Handle the job.
@@ -97,18 +101,9 @@ class ImportDeviceJob implements ShouldQueue, ShouldBeUnique {
     public function handle(): void {
 
 
-        Log::debug('Import array: ', [$this->data]);
+        Log::info('Handle job with data: ', [$this->data]);
 
         $obj = new CsvProcessor();
         $obj->import($this->data);
-    }
-
-    /**
-     * Get the unique identifier for the job.
-     *
-     * @return string|null
-     */
-    public function uniqueId(): ?string {
-        return $this->uniqueId;
     }
 }
