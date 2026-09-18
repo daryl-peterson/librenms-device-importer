@@ -30,7 +30,7 @@
                 "DRP\\DeviceImporter\\PluginProvider"
             ],
             "aliases": {
-                "PluginProvider": "DRP\\DeviceImporter\\Facade"
+                "DeviceImporter": "DRP\\DeviceImporter\\Facades\\DeviceImporterFacade"
             }
         }
     },
