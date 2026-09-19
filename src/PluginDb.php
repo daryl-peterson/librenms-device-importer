@@ -118,12 +118,12 @@ class PluginDb {
         }
 
         try {
-            $result = self::$pluginCache->get(PluginCache::DB_PASS, false);
+            $result = self::$pluginCache->get(CACHE_DB_PASS, false);
             if ($result) {
                 return true;
             }
 
-            if (self::$pluginCache->has(PluginCache::DB_ERROR)) {
+            if (self::$pluginCache->has(CACHE_DB_ERROR)) {
                 return false;
             }
 
@@ -131,7 +131,7 @@ class PluginDb {
             $result = DB::connection($conn)->getPdo();
 
             self::$pluginCache->set(
-                PluginCache::DB_PASS,
+                CACHE_DB_PASS,
                 true,
                 $ttlPass
             );
@@ -139,12 +139,12 @@ class PluginDb {
             return true;
         } catch (\Exception $e) {
             self::$pluginCache->set(
-                PluginCache::DB_PASS,
+                CACHE_DB_PASS,
                 false,
                 $ttlError
             );
             self::$pluginCache->set(
-                PluginCache::DB_ERROR,
+                CACHE_DB_ERROR,
                 'Unable to connect to database',
                 $ttlError
             );
@@ -174,7 +174,7 @@ class PluginDb {
 
         $conn = self::getDbConnection();
 
-        if (self::$pluginCache->has(PluginCache::DB_MIGRATION_CHECK) && !$bypassCache) {
+        if (self::$pluginCache->has(CACHE_DB_MIGRATION_CHECK) && !$bypassCache) {
             return;
         }
 
@@ -199,14 +199,14 @@ class PluginDb {
             Log::debug("Migrations output: " . PHP_EOL . $output);
 
             self::$pluginCache->set(
-                PluginCache::DB_MIGRATION_CHECK,
+                CACHE_DB_MIGRATION_CHECK,
                 true,
                 $ttl_days
             );
         } catch (Throwable $th) {
             Log::error("Error checking migrations table: " . $th->getMessage());
             self::$pluginCache->set(
-                PluginCache::DB_MIGRATION_CHECK,
+                CACHE_DB_MIGRATION_CHECK,
                 true,
                 $ttl_mins
             );
@@ -231,8 +231,8 @@ class PluginDb {
      * @since 0.0.1
      */
     public static function getError(): ?string {
-        if (self::$pluginCache->has(PluginCache::DB_ERROR)) {
-            return self::$pluginCache->get(PluginCache::DB_ERROR);
+        if (self::$pluginCache->has(CACHE_DB_ERROR)) {
+            return self::$pluginCache->get(CACHE_DB_ERROR);
         }
         return null;
     }

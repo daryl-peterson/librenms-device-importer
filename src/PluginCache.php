@@ -49,31 +49,19 @@ class PluginCache {
     const TTL = 600; // 5 minutes
 
     /**
-     * Database cache keys for connection checks.
-     */
-    const DB_PASS = 'db_pass';
-
-    /**
-     * Database cache key for migration checks.
-     */
-    const DB_MIGRATION_CHECK = 'db_migration_check';
-
-    /**
-     * @var string The cache key for database errors.
-     */
-    const DB_ERROR = 'db_error';
-
-    /**
      * List of keys that have been set
      *
      * @var array
      */
     private static array $keys = [];
 
+    /**
+     * Default cache values for the plugin.
+     */
     private static $default = [
-        self::DB_PASS => false,
-        self::DB_ERROR => null,
-        self::DB_MIGRATION_CHECK => false,
+        CACHE_DB_PASS => false,
+        CACHE_DB_ERROR => null,
+        CACHE_DB_MIGRATION_CHECK => false,
     ];
 
     /**

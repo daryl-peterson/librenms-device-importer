@@ -68,7 +68,7 @@ class PluginData {
      * @version 0.0.1
      */
     public static function getInfo() {
-        $dbError = PluginCache::get(PluginCache::DB_ERROR);
+        $dbError = PluginCache::get(CACHE_DB_ERROR);
 
         $result = array(
             'name'     => PLUGIN_NAME,
