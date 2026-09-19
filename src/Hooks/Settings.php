@@ -17,6 +17,8 @@ use App\Plugins\Hooks\SettingsHook;
 use DRP\DeviceImporter\Log;
 use DRP\DeviceImporter\PluginData;
 
+use const DRP\DeviceImporter\PLUGIN_NAME;
+
 /**
  * Settings for the Device Importer plugin.
  *
@@ -36,7 +38,7 @@ class Settings extends SettingsHook {
     private string $plugin;
 
     public function __construct() {
-        $this->plugin = PluginData::PLUGIN;
+        $this->plugin = PLUGIN_NAME;
     }
 
     public function getRouteName(): string {

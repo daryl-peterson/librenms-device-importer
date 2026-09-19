@@ -182,11 +182,11 @@ class PluginSettings {
      */
     private function getDefaults(): array {
         $settings = [];
-        $settings['database'] = PluginDb::PLUGIN_DB_DATABASE;
-        $settings['host'] = PluginDb::PLUGIN_DB_HOST;
-        $settings['port'] = PluginDb::PLUGIN_DB_PORT;
-        $settings['username'] = PluginDb::PLUGIN_DB_USERNAME;
-        $settings['password'] = PluginDb::PLUGIN_DB_PASSWORD;
+        $settings['database'] = PLUGIN_DB_DATABASE;
+        $settings['host'] = PLUGIN_DB_HOST;
+        $settings['port'] = PLUGIN_DB_PORT;
+        $settings['username'] = PLUGIN_DB_USERNAME;
+        $settings['password'] = PLUGIN_DB_PASSWORD;
         return $settings;
     }
 }

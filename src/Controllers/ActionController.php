@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * Action Controller
  *
@@ -17,22 +18,33 @@ namespace DRP\DeviceImporter\Controllers;
  * Standard PHP imports.
  */
 
-use DRP\DeviceImporter\CsvProcessor;
-use DRP\DeviceImporter\Helper;
-use DRP\DeviceImporter\Jobs\ImportDeviceJob;
-use DRP\DeviceImporter\Log;
-use DRP\DeviceImporter\PluginData;
-use DRP\DeviceImporter\PluginSettings;
-use DRP\DeviceImporter\TraitHidePrivates;
-use DRP\DeviceImporter\TraitValidateAdmin;
 use Exception;
+use Throwable;
+
+/**
+ * Laravel and Symfony imports.
+ */
+
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Queue;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Throwable;
+
+
+/**
+ * Plugin imports.
+ */
+
+use DRP\DeviceImporter\CsvProcessor;
+use DRP\DeviceImporter\Helper;
+use DRP\DeviceImporter\Jobs\ImportDeviceJob;
+use DRP\DeviceImporter\Log;
+use DRP\DeviceImporter\PluginSettings;
+use DRP\DeviceImporter\TraitHidePrivates;
+use DRP\DeviceImporter\TraitValidateAdmin;
+use const DRP\DeviceImporter\PLUGIN_NAME;
 
 /**
  * Action Controller
@@ -60,7 +72,7 @@ class ActionController extends Controller {
     }
 
     /**
-     * Handel request.
+     * Handle request.
      *
      * @param Request $request
      * @return StreamedResponse|Redirector|RedirectResponse|null
@@ -163,7 +175,7 @@ class ActionController extends Controller {
 
             $data = file($file->getRealPath(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             $path = $file->getRealPath();
-            
+
 
             Queue::connection('plugin_queue')->push(new ImportDeviceJob($data));
 
@@ -230,7 +242,7 @@ class ActionController extends Controller {
         $query = [];
 
         if (is_null($url)) {
-            $url = url('plugin/' . PluginData::PLUGIN);
+            $url = url('plugin/' . PLUGIN_NAME);
         }
 
         if ($type !== null) {

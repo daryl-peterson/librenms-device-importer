@@ -39,11 +39,6 @@ use DRP\DeviceImporter\PluginCache;
  */
 class PluginData {
 
-    const PLUGIN        = 'device-importer';
-    const TITLE         = 'Device Importer';
-    const AUTHOR        = 'Daryl Peterson';
-    const VER           = 'v0.1.0-alpha.08';
-
     /**
      * Constructor.
      *
@@ -76,10 +71,10 @@ class PluginData {
         $dbError = PluginCache::get(PluginCache::DB_ERROR);
 
         $result = array(
-            'name'     => self::PLUGIN,
-            'title'    => self::TITLE,
-            'author'   => self::AUTHOR,
-            'ver'      => self::VER,
+            'name'     => PLUGIN_NAME,
+            'title'    => PLUGIN_TITLE,
+            'author'   => PLUGIN_AUTHOR,
+            'ver'      => PLUGIN_VER,
             'image'    => 'https://avatars.githubusercontent.com/u/13834451?s=400&u=ff8417db6126da8d9ff82822ea0be5897ad744b3&v=4',
             'settings' => self::getSettings(),
             'dbStatus'  => [
@@ -98,11 +93,11 @@ class PluginData {
      * @version 0.0.1
      */
     public static function getPluginModel(): PluginModel|null {
-        $result = PluginModel::where('plugin_name', self::PLUGIN)->first();
+        $result = PluginModel::where('plugin_name', PLUGIN_NAME)->first();
 
         // Check if the plugin exists in the database.
         if (is_null($result)) {
-            Log::error('Plugin not found: ' . self::PLUGIN);
+            Log::error('Plugin not found: ' . PLUGIN_NAME);
             return null;
         }
         return $result;
@@ -121,6 +116,6 @@ class PluginData {
     }
 
     public static function getPluginName(): string {
-        return self::PLUGIN;
+        return PLUGIN_NAME;
     }
 }

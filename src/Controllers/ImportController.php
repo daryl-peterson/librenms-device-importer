@@ -27,6 +27,7 @@ use Illuminate\View\View;
 use DRP\DeviceImporter\TraitHidePrivates;
 use DRP\DeviceImporter\PluginData;
 use DRP\DeviceImporter\TraitValidateAdmin;
+use const DRP\DeviceImporter\PLUGIN_NAME;
 
 /**
  * LibreNMS Device Importer Import Controller
@@ -52,7 +53,7 @@ class ImportController extends Controller {
      */
     public function __construct() {
         $this->info = PluginData::getInfo();
-        $this->plugin = PluginData::PLUGIN;
+        $this->plugin = PLUGIN_NAME;
     }
 
 

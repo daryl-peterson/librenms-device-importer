@@ -73,6 +73,7 @@ class PluginProvider extends ServiceProvider {
      * @since 0.0.1
      */
     public function register(): void {
+        require_once __DIR__ . '/constants.php';
         PluginDb::initConfig();
     }
 

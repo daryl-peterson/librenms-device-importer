@@ -19,10 +19,9 @@ use Illuminate\Support\Facades\Route;
 
 use DRP\DeviceImporter\Controllers\ImportController;
 use DRP\DeviceImporter\Controllers\ActionController;
-use DRP\DeviceImporter\PluginDb;
-use DRP\DeviceImporter\PluginData;
+use const DRP\DeviceImporter\PLUGIN_NAME;
 
-$plugin = PluginData::PLUGIN;
+$plugin = PLUGIN_NAME;
 
 
 /**
