@@ -113,6 +113,8 @@ class PluginProvider extends ServiceProvider {
             $pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
             $pluginManager->publishHook($pluginName, SettingsHookInterface::class, Settings::class);
 
+
+
             if ($this->app->runningInConsole()) {
                 $this->commands([
                     ProcessPluginQueue::class,
@@ -121,16 +123,19 @@ class PluginProvider extends ServiceProvider {
                 ]);
             }
 
+
             // Wait until LibreNMS completely boots up
+            $isServiceActive = Helper::isServiceActive();
+            if ($isServiceActive) {
+                $this->app->booted(function () {
+                    $schedule = $this->app->make(Schedule::class);
 
-            $this->app->booted(function () {
-                $schedule = $this->app->make(Schedule::class);
-
-                // Trigger your scheduled task safely
-                $schedule
-                    ->command('device-importer:process-plugin-queue')
-                    ->everyTwoMinutes();
-            });
+                    // Trigger your scheduled task safely
+                    $schedule
+                        ->command('device-importer:process-plugin-queue')
+                        ->everyTwoMinutes();
+                });
+            }
 
 
             $this->clearCacheOnFirstRun();

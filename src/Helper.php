@@ -83,4 +83,26 @@ class Helper {
         $date = new DateTimeImmutable();
         return $date->format($format);
     }
+
+    /**
+     * Check if the LibreNMS service is active.
+     *
+     * @return bool True if the service is active, false otherwise.
+     * @since 0.0.1
+     */
+    public static function isServiceActive() {
+
+        try {
+            // Check if the librenms systemd service is active on the host machine
+            $isServiceActive = shell_exec('systemctl is-active librenms.service') === "active\n";
+
+            if ($isServiceActive) {
+                return true;
+            }
+            return false;
+        } catch (\Throwable $th) {
+            Log::error("Error checking if LibreNMS service is active: " . $th->getMessage());
+        }
+        return false;
+    }
 }
