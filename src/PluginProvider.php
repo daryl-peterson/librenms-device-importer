@@ -50,10 +50,12 @@ use DRP\DeviceImporter\PluginDb;
  * Define the plugin path constant.
  */
 
+/*
 define(
     'DEVICE_IMPORTER_PATH',
     'vendor/daryl-peterson/librenms-device-importer/'
 );
+*/
 
 /**
  * LibreNMS Device Importer Plugin Service Provider.
@@ -86,7 +88,7 @@ class PluginProvider extends ServiceProvider {
     public function boot(): void {
         try {
 
-            $pluginName = 'device-importer';
+            $pluginName = PLUGIN_NAME;
 
             // Run the plugin database initialization and checks.
             PluginDb::run();
@@ -105,16 +107,13 @@ class PluginProvider extends ServiceProvider {
                 __DIR__ . '/..',
                 __DIR__ . '/../resources/views',
             ];
-            $this->loadViewsFrom($paths, 'device-importer');
+            $this->loadViewsFrom($paths, $pluginName);
             $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-
 
             $pluginManager = $this->app->make(PluginManagerInterface::class);
             $pluginManager->publishHook($pluginName, MenuEntryHookInterface::class, Menu::class);
             $pluginManager->publishHook($pluginName, SinglePageHook::class, Page::class);
             $pluginManager->publishHook($pluginName, SettingsHookInterface::class, Settings::class);
-
-
 
             if ($this->app->runningInConsole()) {
                 $this->commands([

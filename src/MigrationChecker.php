@@ -37,10 +37,10 @@ class MigrationChecker {
     public static function checkAndMigrate(bool $runPending = false): array {
 
         // 1. Define the absolute path to your package migrations folder
-        $packageMigrationPath = DEVICE_IMPORTER_PATH . 'database/migrations';
+        $pathMigration = PLUGIN_PATH . 'database/migrations';
 
-        Log::debug("Checking migrations in path: $packageMigrationPath");
-        if (!is_dir($packageMigrationPath)) {
+        Log::debug("Checking migrations in path: $pathMigration");
+        if (!is_dir($pathMigration)) {
             return ['has_pending' => false, 'pending' => []];
         }
 
@@ -49,7 +49,7 @@ class MigrationChecker {
         $migrator->setConnection(PluginDb::getDbConnection());
 
         // 3. Scan migrations
-        $migrationFiles = $migrator->getMigrationFiles([$packageMigrationPath]);
+        $migrationFiles = $migrator->getMigrationFiles([$pathMigration]);
         Log::debug("Found migration files: ", ['files' => $migrationFiles]);
 
         $ranMigrations = (array) $migrator->getRepository()->getRan();
@@ -64,7 +64,7 @@ class MigrationChecker {
         if ($hasPending && $runPending) {
             Artisan::call('migrate', [
                 '--database' => PluginDb::getDbConnection(),
-                '--path' => 'vendor/daryl-peterson/librenms-device-importer/database/migrations'
+                '--path' => $pathMigration
             ]);
         }
 
