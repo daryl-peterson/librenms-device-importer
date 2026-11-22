@@ -8,8 +8,18 @@
         "importer",
         "csv"
     ],
-    "type": "package",
+    "type": "library",
     "license": "MIT",
+    "funding": [
+        {
+        "type": "github",
+        "url": "https://github.com/sponsors/daryl-peterson"
+        },
+        {
+            "type": "other",
+            "url": "https://buymeacoffee.com"
+        }
+    ],
     "authors": [
         {
             "name": "Daryl Peterson"
