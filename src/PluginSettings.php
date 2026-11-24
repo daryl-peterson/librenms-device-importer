@@ -71,6 +71,7 @@ class PluginSettings {
         }
     }
 
+
     /**
      * Get all plugin settings.
      *

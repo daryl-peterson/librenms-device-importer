@@ -17,6 +17,13 @@ use DRP\DeviceImporter\PluginCache;
  * @license     https://opensource.org MIT License
  * @link        https://github.com/daryl-peterson/
  * @since       0.0.1
+ *
+ * @property-read string $name
+ * @property-read string $title
+ * @property-read string $author
+ * @property-read string $ver
+ * @property-read array $settings
+ * @property-read string $image
  */
 class PluginData {
 
@@ -32,6 +39,39 @@ class PluginData {
             'ver'    => PLUGIN_VER,
             'settings' => $settings,
         ];
+    }
+
+    /**
+     * Get plugin instance.
+     *
+     * @return self
+     * @version 0.0.1
+     */
+    public static function getInstance(): self {
+        return new self();
+    }
+
+    /**
+     * Get plugin data array.
+     *
+     * @return array
+     * @version 0.0.1
+     */
+    public static function getData(): array {
+        $obj = self::getInstance();
+        $dbError = PluginCache::get(CACHE_DB_ERROR);
+        $result = [
+            'info' => [
+                'name'     => $obj->name,
+                'title'    => $obj->title,
+                'author'   => $obj->author,
+                'ver'      => $obj->ver,
+                'image'    => $obj->image,
+            ],
+
+            'settings' => $obj->settings ?? []
+        ];
+        return $result;
     }
 
     /**

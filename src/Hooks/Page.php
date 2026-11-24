@@ -36,10 +36,11 @@ class Page extends PageHook {
      * @version 0.0.1
      */
     public function data(): array {
+        $obj = PluginData::getInstance();
 
         return [
             'info' => PluginData::getInfo(),
-            'plugin' => PluginData::getPluginName(),
+            'plugin' => $obj->name,
         ];
     }
 }

@@ -59,9 +59,10 @@ class Settings extends SettingsHook {
      * @return array The data to be passed to the settings view.
      */
     public function data(array $settings = []): array {
+        $obj = PluginData::getInstance();
         return [
             'info' => PluginData::getInfo(),
-            'plugin'   => PluginData::getPluginName(),
+            'plugin'   => $obj->name,
             'settings' => $settings,
         ];
     }
