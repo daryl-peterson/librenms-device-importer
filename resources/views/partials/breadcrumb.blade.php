@@ -33,6 +33,10 @@
 
                     <a href="{{ route("$plugin.settings") }}" class="sync-filter-url">Settings</a>
                     </span>
+                    |
+                    <span @class(['pagemenu-selected' => $currentRouteName === "$plugin.database-test"])>
+                        <a href="{{ route("$plugin.database-test") }}">Database Test</a>
+                    </span>
                     @if (!isset($info['dbStatus']['error']))
                         |@if ($currentRouteName === "$plugin.export")
                             <span class="pagemenu-selected" style="margin-right: 4px">

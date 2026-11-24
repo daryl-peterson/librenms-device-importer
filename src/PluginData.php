@@ -1,27 +1,8 @@
 <?php
 
-/**
- * LibreNMS Device Importer Plugin.
- *
- * @package     device-importer
- * @author      Daryl Peterson <@gmail.com>
- * @copyright   Copyright (c) 2026, Daryl Peterson
- * @license     https://opensource.org MIT License
- * @link        https://github.com/daryl-peterson/
- * @since       0.0.1
- */
-
 namespace DRP\DeviceImporter;
 
-/**
- * Laravel and application imports.
- */
-
 use App\Models\Plugin as PluginModel;
-
-/**
- * Plugin imports.
- */
 
 use DRP\DeviceImporter\Log;
 use DRP\DeviceImporter\PluginSettings;
@@ -39,15 +20,19 @@ use DRP\DeviceImporter\PluginCache;
  */
 class PluginData {
 
-    /**
-     * Constructor.
-     *
-     * @since 0.0.1
-     */
-    public function __construct() {
-        # Code Here
-    }
+    private array $data = [];
 
+    public function __construct() {
+        $settings = (array) self::getSettings();
+
+        $this->data = [
+            'name'  => PLUGIN_NAME,
+            'title' => PLUGIN_TITLE,
+            'author' => PLUGIN_AUTHOR,
+            'ver'    => PLUGIN_VER,
+            'settings' => $settings,
+        ];
+    }
 
     /**
      * Get plugin information.
@@ -117,5 +102,54 @@ class PluginData {
 
     public static function getPluginName(): string {
         return PLUGIN_NAME;
+    }
+
+
+    /**
+     * Get plugin name.
+     *
+     * @return string
+     * @version 0.0.1
+     */
+    public string $name {
+        get => $this->data['name'];
+    }
+
+    /**
+     * Get plugin title.
+     *
+     * @return string
+     * @version 0.0.1
+     */
+    public string $title {
+        get => $this->data['title'];
+    }
+    /**
+     * Get plugin author.
+     *
+     * @return string
+     * @version 0.0.1
+     */
+    public string $author {
+        get => $this->data['author'];
+    }
+    /**
+     * Get plugin version.
+     *
+     * @return string
+     * @version 0.0.1
+     */
+    public string $ver {
+        get => $this->data['ver'];
+    }
+
+    /**
+     * Get plugin settings.
+     *
+     * @return array
+     * @version 0.0.1
+     */
+    public array $settings {
+        get => $this->data['settings'];
     }
 }

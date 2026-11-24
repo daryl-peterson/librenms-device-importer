@@ -52,7 +52,7 @@
                         <button type="submit" class="btn btn-primary pull-right" name="action" value="save"
                             style="margin-left: 10px;">Save Settings</button>
 
-                        <button type="submit" class="btn btn-primary pull-right" name="action" value="test">Test Settings</button>
+                        <a class="btn btn-default pull-right" href="{{ route("$plugin.database-test") }}">Database Test</a>
 
                     </form>
                 </div>

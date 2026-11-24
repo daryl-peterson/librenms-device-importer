@@ -104,6 +104,21 @@ class PluginDb {
     }
 
     /**
+     * Test the configured database with a fresh connection and a read-only table check.
+     */
+    public static function testDatabase(array $config): bool {
+        $config['options'][\PDO::ATTR_TIMEOUT] = 5;
+        $connection = app('db.factory')->make($config);
+
+        try {
+            $connection->getPdo();
+            return $connection->getSchemaBuilder()->hasTable('migrations');
+        } finally {
+            $connection->disconnect();
+        }
+    }
+
+    /**
      * Check database connection.
      *
      * @return boolean

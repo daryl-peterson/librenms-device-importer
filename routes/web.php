@@ -46,6 +46,10 @@ Route::middleware(['web'])
     ->get("plugin/settings/$plugin", [ImportController::class, 'settings'])
     ->name("$plugin.settings");
 
+Route::middleware(['web', 'auth'])
+    ->match(['get', 'post'], "plugin/$plugin/database-test", [ImportController::class, 'databaseTest'])
+    ->name("$plugin.database-test");
+
 /**
  * Action route
  */
